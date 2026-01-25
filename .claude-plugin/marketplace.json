@@ -1,34 +1,43 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "timothy-liao-marketplace",
-  "description": "Custom marketplace for Timothy Liao's Adobe Animate and CreateJS development tools",
   "owner": {
     "name": "Timothy Liao",
     "email": "tim80411@gmail.com"
   },
+  "metadata": {
+    "description": "Custom marketplace for Timothy Liao's development tools including Adobe Animate/CreateJS and xAPI learning analytics",
+    "version": "1.0.0"
+  },
   "plugins": [
     {
       "name": "animate-dev",
+      "source": "./plugins/animate-dev",
       "description": "Adobe Animate + CreateJS development expert with performance optimization tools",
       "version": "1.0.0",
       "author": {
         "name": "Timothy Liao",
         "email": "tim80411@gmail.com"
       },
-      "source": "./plugins/animate-dev",
+      "repository": "https://github.com/tim80411/ai-agent-extension",
+      "license": "MIT",
       "category": "development",
+      "keywords": ["adobe-animate", "createjs", "animation", "canvas", "performance"],
       "strict": false
     },
     {
       "name": "xapi-engineer",
+      "source": "./plugins/xapi-engineer",
       "description": "xAPI statement generation and validation expert for educational assessment tracking",
       "version": "1.0.0",
       "author": {
         "name": "Timothy Liao",
         "email": "tim80411@gmail.com"
       },
-      "source": "./plugins/xapi-engineer",
+      "repository": "https://github.com/tim80411/ai-agent-extension",
+      "license": "MIT",
       "category": "development",
+      "keywords": ["xapi", "tincan", "lrs", "learning-analytics", "cmi5", "scorm"],
       "strict": false
     }
   ]
