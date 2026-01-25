@@ -5,5 +5,8 @@
   "author": {
     "name": "Timothy Liao",
     "email": "tim80411@gmail.com"
-  }
+  },
+  "repository": "https://github.com/tim80411/ai-agent-extension",
+  "license": "MIT",
+  "keywords": ["xapi", "tincan", "lrs", "learning-analytics", "cmi5", "scorm"]
 }
