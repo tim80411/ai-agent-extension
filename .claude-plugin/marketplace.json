@@ -1,0 +1,23 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "timothy-liao-marketplace",
+  "description": "Custom marketplace for Timothy Liao's Adobe Animate and CreateJS development tools",
+  "owner": {
+    "name": "Timothy Liao",
+    "email": "tim80411@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "animate-dev",
+      "description": "Adobe Animate + CreateJS development expert with performance optimization tools",
+      "version": "1.0.0",
+      "author": {
+        "name": "Timothy Liao",
+        "email": "tim80411@gmail.com"
+      },
+      "source": "./plugins/animate-dev",
+      "category": "development",
+      "strict": false
+    }
+  ]
+}
