@@ -1,0 +1,9 @@
+{
+  "name": "xapi-engineer",
+  "version": "1.0.0",
+  "description": "xAPI statement generation and validation expert for educational assessment tracking",
+  "author": {
+    "name": "Timothy Liao",
+    "email": "tim80411@gmail.com"
+  }
+}

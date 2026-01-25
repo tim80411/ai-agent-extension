@@ -18,6 +18,18 @@
       "source": "./plugins/animate-dev",
       "category": "development",
       "strict": false
+    },
+    {
+      "name": "xapi-engineer",
+      "description": "xAPI statement generation and validation expert for educational assessment tracking",
+      "version": "1.0.0",
+      "author": {
+        "name": "Timothy Liao",
+        "email": "tim80411@gmail.com"
+      },
+      "source": "./plugins/xapi-engineer",
+      "category": "development",
+      "strict": false
     }
   ]
 }
