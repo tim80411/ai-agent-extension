@@ -1,0 +1,11 @@
+{
+  "name": "figma-reader",
+  "version": "0.1.0",
+  "description": "Read Figma designs via link, extract structured page layout summaries with minimal context window usage",
+  "author": {
+    "name": "Timothy Liao",
+    "email": "tim80411@gmail.com"
+  },
+  "repository": "https://github.com/tim80411/ai-agent-extension",
+  "license": "MIT"
+}
