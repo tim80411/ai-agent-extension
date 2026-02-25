@@ -1,0 +1,8 @@
+{
+  "name": "spec-writer",
+  "version": "0.1.0",
+  "description": "Spec/Story 撰寫方法論 — 引導撰寫高品質 User Story 與 Enabler Story",
+  "author": {
+    "name": "tim80411"
+  }
+}
