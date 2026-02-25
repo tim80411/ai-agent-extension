@@ -54,6 +54,21 @@
       "category": "development",
       "keywords": ["figma", "design", "ui-layout", "context-optimization"],
       "strict": false
+    },
+    {
+      "name": "spec-writer",
+      "source": "./plugins/spec-writer",
+      "description": "Spec/Story 撰寫方法論 — 引導撰寫高品質 User Story 與 Enabler Story，含 INVEST 檢查與反模式掃描",
+      "version": "0.1.0",
+      "author": {
+        "name": "Timothy Liao",
+        "email": "tim80411@gmail.com"
+      },
+      "repository": "https://github.com/tim80411/ai-agent-extension",
+      "license": "MIT",
+      "category": "development",
+      "keywords": ["spec", "user-story", "agile", "invest", "methodology"],
+      "strict": false
     }
   ]
 }
