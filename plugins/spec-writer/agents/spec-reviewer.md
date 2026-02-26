@@ -47,12 +47,13 @@ tools: ["Read", "Grep", "Glob"]
 
 **審查流程：**
 
-1. 讀取待審查的 Stories 內容
-2. 對每個 Story 逐一執行 INVEST 檢查，記錄 pass/fail
-3. 對每個 Story 逐一比對反模式清單
-4. 檢查驗收標準是否描述「What」而非「How」
-5. 檢查是否有超過 30% 的 Stories 標記為 P0
-6. 彙整審查結果
+1. 讀取 `references/05-invest-checklist.md` 與 `references/06-anti-patterns.md` 作為評判依據
+2. 讀取待審查的 Stories 內容
+3. 對每個 Story 逐一執行 INVEST 檢查，記錄 pass/fail
+4. 對每個 Story 逐一比對反模式清單
+5. 檢查驗收標準是否描述「What」而非「How」
+6. 檢查是否有超過 30% 的 Stories 標記為 P0
+7. 彙整審查結果
 
 **INVEST 檢查標準：**
 
