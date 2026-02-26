@@ -1,29 +1,42 @@
 # Timothy Liao's Plugin Marketplace
 
-Custom marketplace for Adobe Animate and CreateJS development tools.
+Custom marketplace for development tools including Adobe Animate/CreateJS, xAPI learning analytics, Figma design reading, and spec writing methodology.
 
 ## Plugins
 
 ### animate-dev
 
-Adobe Animate + CreateJS development expert with comprehensive performance optimization capabilities.
+Adobe Animate + CreateJS development expert with performance optimization tools.
 
-**Features:**
-- Auto-fix debugging for common CreateJS issues
-- MovieClip lifecycle management
-- Event handling patterns
-- Performance optimization tools
-- Memory leak detection and prevention
-- Automatic performance analysis
+- **Skills**: `animate-dev`, `animate-performance`
+- **Agents**: code-reviewer, component-analyzer, createjs-developer, issue-finder, performance-analyzer
+- **Version:** 1.0.0
 
-**Components:**
-- **Main Skill**: `animate-dev` - Complete Adobe Animate + CreateJS development guide
-- **Performance Skill**: `animate-performance` - Dedicated performance optimization guidance
-- **Performance Analyzer Agent**: Automated performance issue detection and fixing
+### xapi-engineer
 
-**Version:** 1.0.0
+xAPI statement generation and validation expert for educational assessment tracking.
 
-**Author:** Timothy Liao (tim80411@gmail.com)
+- **Skills**: `xapi-specification`, `prompt-engineering`
+- **Agents**: xapi-designer
+- **Commands**: `/analyze`, `/generate`, `/validate`
+- **Version:** 1.0.0
+
+### figma-reader
+
+Read Figma designs via link, extract structured page layout summaries with minimal context window usage.
+
+- **Skills**: `figma-read`
+- **Agents**: figma-reader
+- **Commands**: `/figma-read`
+- **Version:** 0.1.0
+
+### spec-writer
+
+Spec/Story 撰寫方法論 — 引導撰寫高品質 User Story 與 Enabler Story，含 INVEST 檢查與反模式掃描。
+
+- **Skills**: `spec-writing`
+- **Agents**: codebase-explorer, context-reader, spec-reviewer
+- **Version:** 0.1.0
 
 ## Installation
 
@@ -32,63 +45,42 @@ This marketplace is automatically loaded from:
 ~/.claude/plugins/marketplaces/timothy-liao-marketplace/
 ```
 
-The plugin should appear in Claude Code's plugin list after marketplace discovery.
-
-## Usage
-
-### Trigger Main Skill
-```
-"I'm working with Adobe Animate and CreateJS"
-"Help me debug this MovieClip issue"
-"gotoAndStop is undefined"
-```
-
-### Trigger Performance Analysis
-```
-"Check this project for performance issues"
-"Optimize the performance"
-"檢查效能問題"
-```
-
-### Trigger Performance Optimization Skill
-```
-"How to optimize Adobe Animate performance?"
-"Check for memory leaks in CreateJS"
-"效能優化的最佳實踐"
-```
+The plugins should appear in Claude Code's plugin list after marketplace discovery.
 
 ## Structure
 
 ```
 timothy-liao-marketplace/
 ├── .claude-plugin/
-│   └── marketplace.json          # Marketplace manifest
+│   └── marketplace.json
 ├── plugins/
-│   └── animate-dev/
-│       ├── .claude-plugin/
-│       │   └── plugin.json       # Plugin manifest
+│   ├── animate-dev/
+│   │   ├── .claude-plugin/plugin.json
+│   │   ├── agents/
+│   │   ├── references/
+│   │   └── skills/
+│   ├── xapi-engineer/
+│   │   ├── .claude-plugin/plugin.json
+│   │   ├── agents/
+│   │   ├── commands/
+│   │   └── skills/
+│   ├── figma-reader/
+│   │   ├── .claude-plugin/plugin.json
+│   │   ├── agents/
+│   │   ├── commands/
+│   │   └── skills/
+│   └── spec-writer/
+│       ├── .claude-plugin/plugin.json
 │       ├── agents/
-│       │   └── performance-analyzer.md
-│       ├── skills/
-│       │   ├── animate-dev/
-│       │   │   ├── SKILL.md
-│       │   │   └── references/
-│       │   └── animate-performance/
-│       │       ├── SKILL.md
-│       │       └── references/
-│       │           ├── common-patterns.md
-│       │           └── fix-strategies.md
-│       └── README.md
-└── README.md                     # This file
+│       └── skills/
+├── LICENSE
+└── README.md
 ```
 
-## Maintenance
+## Author
 
-To update the plugin:
-1. Make changes to the plugin files
-2. Increment version in `marketplace.json` and `plugin.json`
-3. Restart Claude Code to reload plugins
+Timothy Liao (tim80411@gmail.com)
 
 ## License
 
-Custom plugin for personal use.
+MIT
