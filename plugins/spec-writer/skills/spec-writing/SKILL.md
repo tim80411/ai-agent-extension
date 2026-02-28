@@ -130,17 +130,23 @@ description: >-
       ```
 
    b. **讀取對應模板**：
-      - User Story → `references/user-story.md`
-      - Enabler Story → `references/enabler-story.md`
-      - Spike → `references/spike.md`
+      - User Story → `assets/user-story.md`
+      - Enabler Story → `assets/enabler-story.md`
+      - Spike → `assets/spike.md`
 
    c. **填寫模板**，替換所有佔位符；不適用的段落整段移除。
 
-   d. **套用命名規則**（來自 `references/08-workflow-conventions.md`）：
+   d. **撰寫驗收標準**（參照 `references/03-acceptance-criteria.md`），以 Given-When-Then 情境格式撰寫：
+      - 每個 Story 至少包含一個 Happy Path 情境
+      - 評估是否需要 Error Path 和 Edge Case 情境
+      - Given 可包含多個前提條件（用 AND 串接），When 只有一個觸發動作
+      - 每條情境都應可被 QA 直接轉為測試案例
+
+   e. **套用命名規則**（來自 `references/08-workflow-conventions.md`）：
       - 取得當前最大 Story ID（來自 Phase 0 Context Summary 或從使用者確認）
       - 分配下一個編號
 
-   e. **標記 Labels 與優先序**（參照 `references/04-prioritization.md`）。
+   f. **標記 Labels 與優先序**（參照 `references/04-prioritization.md`）。
 
 3. 完成所有 Stories 草稿後，以清晰格式呈現給使用者確認。
 
@@ -222,3 +228,9 @@ Phase 3: Quality Review
 - **`references/06-anti-patterns.md`** — 常見反模式清單與修正方式
 - **`references/07-frameworks-comparison.md`** — 各方法論比較（JTBD、Shape Up、Working Backwards）
 - **`references/08-workflow-conventions.md`** — 標題命名、Label 規則、Story ID 編號規則、模板對應
+
+## 模板索引
+
+- **`assets/user-story.md`** — User Story 模板（Given-When-Then 驗收標準格式）
+- **`assets/enabler-story.md`** — Enabler Story 模板（Given-When-Then 驗收標準格式）
+- **`assets/spike.md`** — Spike 模板
