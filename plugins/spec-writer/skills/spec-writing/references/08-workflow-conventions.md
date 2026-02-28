@@ -64,8 +64,8 @@ P3 可額外加 `optional` label。
 
 | Story 類型 | 模板檔案 |
 |-----------|---------|
-| User Story | `references/user-story.md` |
-| Enabler Story | `references/enabler-story.md` |
-| Spike | `references/spike.md` |
+| User Story | `assets/user-story.md` |
+| Enabler Story | `assets/enabler-story.md` |
+| Spike | `assets/spike.md` |
 
-**使用方式**：用 `Read` 工具讀取對應模板，以模板結構為基底，將所有佔位符替換為實際內容。若某段落對當前 Story 不適用，整段移除（不保留空白佔位符）。
+**使用方式**：用 `Read` 工具讀取對應模板，以模板結構為基底，將所有佔位符替換為實際內容。若某段落對當前 Story 不適用，整段移除（不保留空白佔位符）。驗收標準須使用 Given-When-Then 情境格式（詳見 `references/03-acceptance-criteria.md`）。
