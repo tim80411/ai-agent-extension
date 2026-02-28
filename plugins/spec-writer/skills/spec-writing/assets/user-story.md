@@ -8,9 +8,22 @@ h2. 範圍
 
 h2. 驗收標準
 
-* 驗收條件 1
-* 驗收條件 2
-* 驗收條件 3
+情境 1: ＿＿（Happy Path）
+GIVEN ＿＿
+WHEN ＿＿
+THEN ＿＿
+
+情境 2: ＿＿（Error Path）
+GIVEN ＿＿
+WHEN ＿＿
+THEN ＿＿
+
+情境 3: ＿＿（Edge Case）
+GIVEN ＿＿
+WHEN ＿＿
+THEN ＿＿
+
+（情境數量不固定，至少需要 Happy Path。Error/Edge 視需求增減。）
 
 h2. 依賴
 
