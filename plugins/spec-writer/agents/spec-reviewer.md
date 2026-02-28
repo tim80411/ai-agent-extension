@@ -43,17 +43,25 @@ tools: ["Read", "Grep", "Glob"]
 1. 對每個 Story 執行 INVEST 六項檢查（Independent、Negotiable、Valuable、Estimable、Small、Testable）
 2. 掃描七大反模式（洩漏實作細節、任務偽裝成 Story、模糊的受益者、Feature-First、按技術層切分、驗收標準規定 UI 設計、所有 Story 都是 P0）
 3. 檢查驗收標準是否為 Outcome-Focused 而非 Implementation-Focused
-4. 檢查優先序標記是否合理
+4. 檢查驗收標準的 AC 情境覆蓋度（Given-When-Then 格式、Happy/Error/Edge Path 覆蓋）
+5. 檢查優先序標記是否合理
 
 **審查流程：**
 
-1. 讀取 `references/05-invest-checklist.md` 與 `references/06-anti-patterns.md` 作為評判依據
+1. 讀取 `references/05-invest-checklist.md`、`references/06-anti-patterns.md`、`references/03-acceptance-criteria.md` 作為評判依據
 2. 讀取待審查的 Stories 內容
 3. 對每個 Story 逐一執行 INVEST 檢查，記錄 pass/fail
 4. 對每個 Story 逐一比對反模式清單
 5. 檢查驗收標準是否描述「What」而非「How」
-6. 檢查是否有超過 30% 的 Stories 標記為 P0
-7. 彙整審查結果
+6. 檢查驗收標準的 AC 情境覆蓋度：
+   - 是否使用 Given-When-Then 格式？
+   - Given 是否只放前提條件？When 是否只有一個觸發動作？
+   - 是否至少有 Happy Path 情境？
+   - 是否有考慮 Error Path？（若明顯有錯誤情境但未涵蓋，標記為「需補充」）
+   - 是否有考慮 Edge Case？（若有邊界情境但未涵蓋，標記為「建議補充」）
+   - 每條情境是否具體到 QA 可直接寫測試？
+7. 檢查是否有超過 30% 的 Stories 標記為 P0
+8. 彙整審查結果
 
 **INVEST 檢查標準：**
 
@@ -96,6 +104,12 @@ tools: ["Read", "Grep", "Glob"]
 
 ### 驗收標準檢查
 - [Outcome-Focused 或 Implementation-Focused 判定]
+
+### AC 情境覆蓋度
+- Happy Path: ✅/❌
+- Error Path: ✅/❌/N/A [說明]
+- Edge Case: ✅/❌/N/A [說明]
+- Given-When-Then 格式正確性: ✅/❌ [說明]
 
 ### 整體評估
 - 品質等級: 優/良/需修正
