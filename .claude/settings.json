@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Check the tool input in $ARGUMENTS. If the file_path is inside a `plugins/` directory, respond with:\n{\"ok\": false, \"reason\": \"You modified a plugin file. Before committing, make sure to bump the version in the plugin's .claude-plugin/plugin.json. Check if the version has already been bumped in this session — if so, no further action needed.\"}\n\nIf the file_path is NOT inside a `plugins/` directory, respond with:\n{\"ok\": true}",
+            "timeout": 10,
+            "statusMessage": "Checking plugin version bump reminder..."
+          }
+        ]
+      }
+    ]
+  }
+}
