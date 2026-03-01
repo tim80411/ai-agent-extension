@@ -6,6 +6,8 @@ description: >-
   "撰寫驗收標準", "寫 acceptance criteria", "拆分 story", "拆解需求",
   "檢查 story 品質", "INVEST 檢查", "反模式掃描",
   "review my user stories", "break down a feature into stories",
+  "story mapping", "需求拆解", "user story mapping",
+  "拆解大功能", "建立 story map",
   or needs guidance on spec writing methodology, story types,
   scoping, acceptance criteria, prioritization, or INVEST quality checks.
 ---
@@ -18,8 +20,9 @@ description: >-
 
 ## 開始前
 
-建立 todo list 追蹤四個階段進度：
+建立 todo list 追蹤各階段進度：
 - [ ] Phase 0: Context Gathering
+- [ ] Phase 0.5: Story Decomposition（若需要全局拆解）
 - [ ] Phase 1: Requirement Clarification
 - [ ] Phase 2: Story Writing
 - [ ] Phase 3: Quality Review
@@ -62,6 +65,49 @@ description: >-
    若使用者無文件且無 codebase，直接建立空白 Context Summary 並進入 Phase 1。
 
 6. 更新 todo，標記 Phase 0 完成。
+
+---
+
+## Phase 0.5: Story Decomposition（可選）
+
+**Goal**: 若需求是模糊的大目標，使用 Story Mapping 從全局拆解出 Stories 清單。
+
+**何時觸發**：
+- Phase 0 收集的資訊顯示需求是一個大功能或多角色場景
+- 使用者明確要求「拆解需求」或「story mapping」
+- 需求沒有明確的 Stories 清單，只有大方向描述
+
+**何時跳過**：
+- 使用者已帶入明確的 Stories 清單
+- 需求是單一明確功能
+- 純技術債重構（無使用者旅程脈絡）
+
+**Required References**:
+- `references/09-story-mapping.md` — Story Mapping 方法論
+
+**Actions**:
+
+1. 使用 `AskUserQuestion` 確認是否需要全局拆解，若使用者確認需要：
+
+2. 啟動 `story-mapper` agent（via Agent 工具）。
+   - Agent 任務：「請根據以下 Context Summary 和需求描述，建立 Story Map 並產出候選 Stories 清單：[Phase 0 的 Context Summary + 使用者需求]」
+   - Agent 須回傳：
+     - 使用者角色清單
+     - Story Map 全貌（Activity → Task → Stories 表格）
+     - Release 建議（含 Outcome 定義）
+     - 候選 Stories 清單（含優先序和建議類型）
+
+3. 向使用者呈現 Story Map 和候選 Stories 清單。
+
+4. 使用 `AskUserQuestion` 詢問使用者：
+   - Story Map 是否正確反映了使用者旅程？
+   - 是否有遺漏的 Activity 或 Task？
+   - Release 切片是否合理？
+   - 哪些 Stories 是本次撰寫範圍？
+
+5. **等待使用者確認後**，將確認的 Stories 清單作為 Phase 1 的輸入。
+
+6. 更新 todo，標記 Phase 0.5 完成。
 
 ---
 
@@ -201,6 +247,11 @@ Phase 0: Context Gathering
   ↓ [codebase-explorer agent] ← 若有 codebase
   ↓ Build Context Summary
 
+Phase 0.5: Story Decomposition（可選）
+  ↓ 需要全局拆解？
+  ├── 是 → [story-mapper agent] → Story Map + Stories 清單 → user confirm
+  └── 否 → 直接進入 Phase 1
+
 Phase 1: Requirement Clarification
   ↓ AskUserQuestion (beneficiary, outcome, no-gos)
   ↓ Story type pre-classification → user confirm
@@ -228,6 +279,7 @@ Phase 3: Quality Review
 - **`references/06-anti-patterns.md`** — 常見反模式清單與修正方式
 - **`references/07-frameworks-comparison.md`** — 各方法論比較（JTBD、Shape Up、Working Backwards）
 - **`references/08-workflow-conventions.md`** — 標題命名、Label 規則、Story ID 編號規則、模板對應
+- **`references/09-story-mapping.md`** — Story Mapping 方法論（Activity → Task → Story 拆解、Release Slicing）
 
 ## 模板索引
 
