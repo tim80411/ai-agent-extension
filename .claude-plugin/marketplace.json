@@ -69,6 +69,21 @@
       "category": "development",
       "keywords": ["spec", "user-story", "agile", "invest", "methodology"],
       "strict": false
+    },
+    {
+      "name": "code-quality-review",
+      "source": "./plugins/code-quality-review",
+      "description": "六維度平行程式碼品質審查 — 可讀性、可測試性、避免意外、難以誤用、模組化、可重用性",
+      "version": "0.1.0",
+      "author": {
+        "name": "Timothy Liao",
+        "email": "tim80411@gmail.com"
+      },
+      "repository": "https://github.com/tim80411/ai-agent-extension",
+      "license": "MIT",
+      "category": "development",
+      "keywords": ["code-review", "quality", "readability", "testability", "modularity", "security"],
+      "strict": false
     }
   ]
 }
