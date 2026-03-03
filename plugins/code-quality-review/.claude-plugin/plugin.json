@@ -1,0 +1,8 @@
+{
+  "name": "code-quality-review",
+  "version": "0.1.0",
+  "description": "六維度平行程式碼品質審查 — 可讀性、可測試性、避免意外、難以誤用、模組化、可重用性",
+  "author": {
+    "name": "tim80411"
+  }
+}
