@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "description": "打包靜態網站專案並上傳至 Google Drive，回傳分享連結",
   "author": {
-    "name": "tim80411"
-  }
+    "name": "Timothy Liao",
+    "email": "tim80411@gmail.com"
+  },
+  "repository": "https://github.com/tim80411/ai-agent-extension",
+  "license": "MIT"
 }

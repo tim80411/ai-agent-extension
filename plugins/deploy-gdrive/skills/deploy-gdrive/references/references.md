@@ -21,8 +21,10 @@ Look for folders containing `index.html` in the workspace:
 ### 3. Get Serial Number
 
 ```bash
-python3 ~/.cursor/skills/deploy-gdrive/scripts/get-serial.py "<PROJECT_NAME>"
+python3 "<SKILL_DIR>/scripts/get-serial.py" "<PROJECT_NAME>"
 ```
+
+`<SKILL_DIR>` is the directory containing this skill's SKILL.md file.
 
 Returns the next serial number. Auto-creates/updates `~/.config/gdrive-deploy/serial.json`.
 

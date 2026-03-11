@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:neo4j.com)",
+      "WebFetch(domain:medium.com)",
+      "WebFetch(domain:webcache.googleusercontent.com)",
+      "WebFetch(domain:jpattonassociates.com)",
+      "WebFetch(domain:www.altexsoft.com)",
+      "WebFetch(domain:storiesonboard.com)",
+      "WebFetch(domain:www.jpattonassociates.com)",
+      "WebFetch(domain:marcabraham.com)",
+      "WebFetch(domain:wall-skills.com)",
+      "WebFetch(domain:www.avion.io)",
+      "WebFetch(domain:www.nngroup.com)",
+      "WebFetch(domain:www.malsanders.com)",
+      "WebFetch(domain:www.mindtheproduct.com)",
+      "WebFetch(domain:srinathramakrishnan.wordpress.com)",
+      "WebFetch(domain:espumita.org)",
+      "WebFetch(domain:productmindset.substack.com)",
+      "WebFetch(domain:www.easyagile.com)",
+      "WebFetch(domain:www.oreilly.com)",
+      "WebFetch(domain:www.uxpin.com)",
+      "WebFetch(domain:userstorymap.io)",
+      "WebFetch(domain:howtoes.blog)",
+      "WebFetch(domain:openpracticelibrary.com)"
+    ]
+  }
+}
