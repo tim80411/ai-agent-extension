@@ -89,7 +89,7 @@
       "name": "deploy-gdrive",
       "source": "./plugins/deploy-gdrive",
       "description": "Package static website projects into zip files and upload to Google Drive with shareable links via gdrive CLI v3",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "author": {
         "name": "Timothy Liao",
         "email": "tim80411@gmail.com"
