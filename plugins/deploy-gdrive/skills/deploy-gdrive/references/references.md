@@ -18,7 +18,32 @@ Look for folders containing `index.html` in the workspace:
 - Exclude `node_modules`, `dist`, `build` if raw source also has `index.html`
 - If multiple candidates, ask the user
 
-### 3. Get Serial Number
+### 3. Analyze Product Name
+
+Do NOT just use the folder name. Run the following commands **from the workspace root** (or the detected static site folder) to gather clues:
+
+```bash
+# Check package.json name
+python3 -c "import json; print(json.load(open('package.json')).get('name',''))" 2>/dev/null
+
+# Check HTML title (adjust path to the detected index.html)
+python3 -c "
+import re
+with open('index.html') as f:
+    m = re.search(r'<title>(.*?)</title>', f.read(), re.IGNORECASE)
+    if m: print(m.group(1))
+" 2>/dev/null
+
+# Check README first heading (supports both README.md and README)
+head -5 README.md README 2>/dev/null | grep -m1 '^#' | sed 's/^#* *//'
+
+# Folder name (as reference only)
+basename "$(pwd)"
+```
+
+Synthesize a concise product name in snake_case from the gathered information, then **confirm with the user** before proceeding.
+
+### 4. Get Serial Number
 
 ```bash
 python3 "<SKILL_DIR>/scripts/get-serial.py" "<PROJECT_NAME>"
@@ -28,7 +53,7 @@ python3 "<SKILL_DIR>/scripts/get-serial.py" "<PROJECT_NAME>"
 
 Returns the next serial number. Auto-creates/updates `~/.config/gdrive-deploy/serial.json`.
 
-### 4. Read Config (Optional)
+### 5. Read Config (Optional)
 
 ```bash
 cat ~/.config/gdrive-deploy/config.json 2>/dev/null
@@ -36,7 +61,7 @@ cat ~/.config/gdrive-deploy/config.json 2>/dev/null
 
 If `default_parent_folder_id` exists, use as upload destination.
 
-### 5. Package
+### 6. Package
 
 ```bash
 cd "<PARENT_DIR_OF_TARGET>"
@@ -50,7 +75,7 @@ zip -r "/tmp/<FILENAME>.zip" "<TARGET_FOLDER_NAME>" \
   -x "*/.env.*"
 ```
 
-### 6. Upload & Share
+### 7. Upload & Share
 
 ```bash
 # Without parent folder
@@ -63,13 +88,15 @@ FILE_ID=$(gdrive files upload --print-only-id --parent "<FOLDER_ID>" "/tmp/<FILE
 gdrive permissions share "$FILE_ID"
 ```
 
-### 7. Generate Link
+### 8. Generate Link & Copy to Clipboard
 
-```
-https://drive.google.com/file/d/<FILE_ID>/view?usp=sharing
+```bash
+SHARE_LINK="https://drive.google.com/file/d/<FILE_ID>/view?usp=sharing"
+echo -n "$SHARE_LINK" | pbcopy
+echo "📋 連結已複製到剪貼簿"
 ```
 
-### 8. Cleanup
+### 9. Cleanup
 
 ```bash
 rm "/tmp/<FILENAME>.zip"

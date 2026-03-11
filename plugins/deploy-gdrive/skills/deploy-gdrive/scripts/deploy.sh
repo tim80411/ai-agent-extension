@@ -81,6 +81,11 @@ gdrive permissions share "$FILE_ID" >/dev/null 2>&1
 # --- Report ---
 SHARE_LINK="https://drive.google.com/file/d/${FILE_ID}/view?usp=sharing"
 
+# --- Copy to clipboard (macOS) ---
+if command -v pbcopy &>/dev/null; then
+    echo -n "$SHARE_LINK" | pbcopy
+fi
+
 echo ""
 echo "✅ 部署完成！"
 echo ""
@@ -89,6 +94,7 @@ echo "📁 來源資料夾: $SOURCE_FOLDER"
 echo "🔗 Google Drive 連結: $SHARE_LINK"
 echo "🔢 序列號: $SERIAL"
 echo "🆔 File ID: $FILE_ID"
+echo "📋 連結已複製到剪貼簿"
 
 # --- Cleanup ---
 rm -f "$ZIP_PATH"
