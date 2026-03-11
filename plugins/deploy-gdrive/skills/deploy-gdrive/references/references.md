@@ -1,0 +1,95 @@
+# Deploy to Google Drive — Reference
+
+## Step-by-Step Commands
+
+### 1. Verify Environment
+
+```bash
+gdrive version
+gdrive account list
+```
+
+If no account: stop and ask user to run `gdrive account add`.
+
+### 2. Detect Static Website Folder
+
+Look for folders containing `index.html` in the workspace:
+- Prefer shallower paths (direct children of workspace root)
+- Exclude `node_modules`, `dist`, `build` if raw source also has `index.html`
+- If multiple candidates, ask the user
+
+### 3. Get Serial Number
+
+```bash
+python3 ~/.cursor/skills/deploy-gdrive/scripts/get-serial.py "<PROJECT_NAME>"
+```
+
+Returns the next serial number. Auto-creates/updates `~/.config/gdrive-deploy/serial.json`.
+
+### 4. Read Config (Optional)
+
+```bash
+cat ~/.config/gdrive-deploy/config.json 2>/dev/null
+```
+
+If `default_parent_folder_id` exists, use as upload destination.
+
+### 5. Package
+
+```bash
+cd "<PARENT_DIR_OF_TARGET>"
+zip -r "/tmp/<FILENAME>.zip" "<TARGET_FOLDER_NAME>" \
+  -x "*/.vscode/*" \
+  -x "*/.DS_Store" \
+  -x "*/node_modules/*" \
+  -x "*/.git/*" \
+  -x "*/__pycache__/*" \
+  -x "*/.env" \
+  -x "*/.env.*"
+```
+
+### 6. Upload & Share
+
+```bash
+# Without parent folder
+FILE_ID=$(gdrive files upload --print-only-id "/tmp/<FILENAME>.zip")
+
+# With parent folder
+FILE_ID=$(gdrive files upload --print-only-id --parent "<FOLDER_ID>" "/tmp/<FILENAME>.zip")
+
+# Share
+gdrive permissions share "$FILE_ID"
+```
+
+### 7. Generate Link
+
+```
+https://drive.google.com/file/d/<FILE_ID>/view?usp=sharing
+```
+
+### 8. Cleanup
+
+```bash
+rm "/tmp/<FILENAME>.zip"
+```
+
+## Error Handling
+
+| Error | Action |
+|-------|--------|
+| gdrive not installed | Tell user: `brew install gdrive` |
+| No account | Tell user: `gdrive account add` |
+| No index.html found | Ask user to specify the static web folder path |
+| Upload fails | Check network, retry once, then report error |
+| Multiple index.html candidates | Present options and ask user to choose |
+
+## gdrive v3 Command Reference
+
+| Command | Purpose |
+|---------|---------|
+| `gdrive files upload --print-only-id <path>` | Upload file, return only file ID |
+| `gdrive files upload --parent <id> <path>` | Upload to specific folder |
+| `gdrive permissions share <file_id>` | Share with anyone (reader) |
+| `gdrive files info <file_id>` | Get file details |
+| `gdrive account list` | List authenticated accounts |
+| `gdrive account add` | Add new Google account |
