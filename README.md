@@ -53,7 +53,15 @@ The plugins should appear in Claude Code's plugin list after marketplace discove
 user-marketplace/
 ├── .claude-plugin/
 │   └── marketplace.json
-├── plugins/
+├── .claude/skills/          ← symlinks for in-project testing (Claude Code)
+│   ├── animate-dev -> ../../plugins/animate-dev/skills/animate-dev
+│   ├── deploy-gdrive -> ../../plugins/deploy-gdrive/skills/deploy-gdrive
+│   └── ...
+├── .cursor/skills/          ← symlinks for in-project testing (Cursor)
+│   ├── animate-dev -> ../../plugins/animate-dev/skills/animate-dev
+│   ├── deploy-gdrive -> ../../plugins/deploy-gdrive/skills/deploy-gdrive
+│   └── ...
+├── plugins/                 ← real skill files (source of truth)
 │   ├── animate-dev/
 │   │   ├── .claude-plugin/plugin.json
 │   │   ├── agents/
@@ -69,13 +77,25 @@ user-marketplace/
 │   │   ├── agents/
 │   │   ├── commands/
 │   │   └── skills/
-│   └── spec-writer/
+│   ├── spec-writer/
+│   │   ├── .claude-plugin/plugin.json
+│   │   ├── agents/
+│   │   └── skills/
+│   ├── code-quality-review/
+│   │   ├── .claude-plugin/plugin.json
+│   │   ├── agents/
+│   │   ├── commands/
+│   │   └── skills/
+│   └── deploy-gdrive/
 │       ├── .claude-plugin/plugin.json
-│       ├── agents/
 │       └── skills/
 ├── LICENSE
 └── README.md
 ```
+
+### Skill Symlinks
+
+`.claude/skills/` 和 `.cursor/skills/` 內的 symlink 指向 `plugins/` 中的真實 skill 目錄，讓你在此專案內即可直接測試 skill，不需全域安裝。編輯 `plugins/` 下的 skill 檔案會立即反映到兩個工具。
 
 ## Author
 
