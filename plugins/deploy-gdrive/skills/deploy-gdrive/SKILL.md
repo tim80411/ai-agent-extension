@@ -19,8 +19,9 @@ Package a static website project and upload it to Google Drive with a shareable 
 3. **Analyze & Confirm Name**: Gather product name clues from project files, synthesize a name, and confirm with the user
 4. **Name**: `{project_name}_{YYYYMMDD}_{serial}.zip`
 5. **Package**: Zip the folder (exclude `.vscode`, `node_modules`, `.DS_Store`, `.git`)
-6. **Upload**: `gdrive files upload` → `gdrive permissions share`
-7. **Report**: Present Google Drive share link and copy it to clipboard
+6. **Archive Old Files**: Move same-project files (matching `{project_name}` prefix) in the parent folder to an `old` subfolder (auto-created if needed)
+7. **Upload**: `gdrive files upload` → `gdrive permissions share`
+8. **Report**: Present Google Drive share link and copy it to clipboard
 
 ## Naming Convention
 

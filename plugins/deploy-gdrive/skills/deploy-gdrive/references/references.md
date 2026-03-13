@@ -61,7 +61,30 @@ cat ~/.config/gdrive-deploy/config.json 2>/dev/null
 
 If `default_parent_folder_id` exists, use as upload destination.
 
-### 6. Package
+### 6. Archive Old Files
+
+If uploading to a parent folder, move existing files to an `old` subfolder first:
+
+```bash
+# Check if 'old' folder exists in parent
+OLD_FOLDER_ID=$(gdrive files list --parent "<PARENT_FOLDER_ID>" --skip-header \
+  --query "name = 'old' and mimeType = 'application/vnd.google-apps.folder' and trashed = false" \
+  | head -1 | cut -f1)
+
+# Create 'old' folder if not found
+if [ -z "$OLD_FOLDER_ID" ]; then
+  OLD_FOLDER_ID=$(gdrive files mkdir --print-only-id --parent "<PARENT_FOLDER_ID>" "old")
+fi
+
+# Move files matching the same project name into 'old'
+gdrive files list --parent "<PARENT_FOLDER_ID>" --skip-header --full-name \
+  --query "name contains '<PROJECT_NAME>' and trashed = false" \
+  | while IFS=$'\t' read -r fid rest; do
+      gdrive files move "$fid" "$OLD_FOLDER_ID"
+    done
+```
+
+### 7. Package
 
 ```bash
 cd "<PARENT_DIR_OF_TARGET>"
@@ -75,7 +98,7 @@ zip -r "/tmp/<FILENAME>.zip" "<TARGET_FOLDER_NAME>" \
   -x "*/.env.*"
 ```
 
-### 7. Upload & Share
+### 8. Upload & Share
 
 ```bash
 # Without parent folder
@@ -88,7 +111,7 @@ FILE_ID=$(gdrive files upload --print-only-id --parent "<FOLDER_ID>" "/tmp/<FILE
 gdrive permissions share "$FILE_ID"
 ```
 
-### 8. Generate Link & Copy to Clipboard
+### 9. Generate Link & Copy to Clipboard
 
 ```bash
 SHARE_LINK="https://drive.google.com/file/d/<FILE_ID>/view?usp=sharing"
@@ -96,7 +119,7 @@ echo -n "$SHARE_LINK" | pbcopy
 echo "📋 連結已複製到剪貼簿"
 ```
 
-### 9. Cleanup
+### 10. Cleanup
 
 ```bash
 rm "/tmp/<FILENAME>.zip"
@@ -120,5 +143,7 @@ rm "/tmp/<FILENAME>.zip"
 | `gdrive files upload --parent <id> <path>` | Upload to specific folder |
 | `gdrive permissions share <file_id>` | Share with anyone (reader) |
 | `gdrive files info <file_id>` | Get file details |
+| `gdrive files mkdir --parent <id> <name>` | Create subfolder in specific folder |
+| `gdrive files move <file_id> <folder_id>` | Move file/folder to another folder |
 | `gdrive account list` | List authenticated accounts |
 | `gdrive account add` | Add new Google account |

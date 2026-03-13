@@ -1,6 +1,6 @@
 {
   "name": "deploy-gdrive",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "打包靜態網站專案並上傳至 Google Drive，回傳分享連結",
   "author": {
     "name": "Timothy Liao",
