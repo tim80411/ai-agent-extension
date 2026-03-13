@@ -1,6 +1,6 @@
 {
   "name": "animate-dev",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Adobe Animate + CreateJS development expert with performance optimization tools",
   "author": {
     "name": "Timothy Liao",
@@ -8,5 +8,11 @@
   },
   "repository": "https://github.com/tim80411/ai-agent-extension",
   "license": "MIT",
-  "keywords": ["adobe-animate", "createjs", "animation", "canvas", "performance"]
+  "keywords": [
+    "adobe-animate",
+    "createjs",
+    "animation",
+    "canvas",
+    "performance"
+  ]
 }

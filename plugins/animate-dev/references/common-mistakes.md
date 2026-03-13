@@ -1,6 +1,8 @@
+> **DEPRECATED**: 此檔案已被 `error-index.md` + `errors/` 取代。將在未來版本移除。
+
 # Common Mistakes from Real Project Analysis
 
-This reference documents common mistakes discovered from comparing error vs correct folder implementations, in real Adobe Animate + CreateJS projects.
+This reference documents common mistakes discovered from comparing error vs correct folder implementations in real Adobe Animate + CreateJS projects.
 
 ## Critical Error 1: Missing CreateJS Library
 
@@ -351,8 +353,8 @@ createjs.Ticker.addEventListener("tick", stage);
 ### Common Anti-Pattern
 ```javascript
 // Assuming nested structure exists
-_thismapContent.location_1.gotoAndStop(0);
-// Error: Cannot read property 'location_1' of undefined
+_this.mapView.item_1.gotoAndStop(0);
+// Error: Cannot read property 'item_1' of undefined
 ```
 
 ### Why This Fails
@@ -364,15 +366,82 @@ _thismapContent.location_1.gotoAndStop(0);
 ### Correct Pattern
 ```javascript
 // Validate path exists
-if (_thismapContent && _thismapContent.location_1) {
-    _thismapContent.location_1.gotoAndStop(0);
+if (_this.mapView && _this.mapView.item_1) {
+    _this.mapView.item_1.gotoAndStop(0);
 } else {
-    console.warn("Component path invalid: _thismapContent.location_1");
+    console.warn("Component path invalid: _this.mapView.item_1");
 }
 
 // Or use optional chaining (ES2020+)
-_thismapContent?.location_1?.gotoAndStop(0);
+_this.mapView?.item_1?.gotoAndStop(0);
 ```
+
+## Error Pattern 11: Canvas Text 自訂字體在觸屏裝置無法顯示
+
+### Common Anti-Pattern
+```javascript
+// Adobe Animate 匯出的 index.js 中，Text 物件使用系統字體名稱
+this.text_label = new cjs.Text("Hello", "bold 70px 'SystemFontName'", "#333333");
+this.text_timer = new cjs.Text("00", "35px 'AnotherSystemFont'", "#FFFFFF");
+```
+
+```html
+<!-- index.html 中用 @font-face 載入字體檔，但 font-family 名稱與 Animate 匯出的不同 -->
+<style>
+  @font-face {
+    font-family: 'MyCustomFont';
+    src: url('../fonts/CustomFont.ttc') format('collection');
+  }
+</style>
+```
+
+### Why This Fails
+- Adobe Animate 匯出的 `index.js` 使用的是字體的**系統安裝名稱**（如 `'SystemFontName'`）
+- CSS `@font-face` 載入字體檔時使用了**不同的 font-family 名稱**（如 `'MyCustomFont'`）
+- **桌面電腦**：如果系統已安裝該字體，用系統名稱也能正常顯示
+- **觸屏裝置（平板、手機）**：系統未安裝該字體，Canvas text 使用的系統名稱找不到字體，退回 fallback 字體
+- 開發時在電腦上測試正常，部署到觸屏裝置才發現字體顯示錯誤
+
+### Correct Pattern — buildNewFont 函數
+
+在 JS function 中直接覆蓋 Canvas text 的 `.font` 屬性，使用與 `@font-face` 一致的 font-family 名稱。
+
+**Step 1: 在 game.js 定義 buildNewFont 工具函數**
+```javascript
+function buildNewFont(object, newFontName) {
+  var currentFontSize = object.font.match(/\d+px/)[0];
+  var newFont = currentFontSize + " " + newFontName;
+  return newFont;
+}
+```
+
+**Step 2: 在場景初始化函數中覆蓋字體**
+```javascript
+// 取得 text 物件參考後，立即用 buildNewFont 覆蓋字體
+// 'MyCustomFont' 必須與 @font-face 的 font-family 名稱一致
+if (textLabel) {
+  textLabel.font = buildNewFont(textLabel, "MyCustomFont");
+}
+
+if (timer.text_minutes) {
+  timer.text_minutes.font = buildNewFont(timer.text_minutes, "MyCustomFont");
+}
+if (timer.text_seconds) {
+  timer.text_seconds.font = buildNewFont(timer.text_seconds, "MyCustomFont");
+}
+```
+
+### Key Points
+1. **不要修改 `index.js`**（Animate 匯出檔），因為重新發布會覆蓋修改
+2. **在 scene 初始化函數中覆蓋**，確保每次進入場景都套用正確字體
+3. `buildNewFont` 會自動保留原本的字體大小（如 `70px`、`35px`），只替換字體名稱
+4. `@font-face` 的 `font-family` 名稱與 `buildNewFont` 第二個參數必須完全一致
+
+### Prevention
+- 匯出 Animate 專案後，檢查 `index.js` 中所有 `new cjs.Text(...)` 使用的字體名稱
+- 確認 `@font-face` 的 `font-family` 名稱是否與 canvas text 的字體名稱一致
+- 若不一致，必須在 JS function 中用 `buildNewFont` 覆蓋
+- **務必在觸屏裝置上測試字體顯示**
 
 ## Summary Checklist
 
@@ -389,6 +458,7 @@ Before deploying Adobe Animate + CreateJS project:
 - [ ] Null checks on all MovieClip path references
 - [ ] Stage ticker is set up
 - [ ] lib/_lib usage appropriate for timing
+- [ ] Canvas text 自訂字體使用 buildNewFont 覆蓋，確保與 @font-face 名稱一致
 
 ## Testing Checklist
 
@@ -399,6 +469,7 @@ After fixing issues:
 - [ ] Click all interactive elements - verify no errors
 - [ ] Navigate through all scenes - check frame control
 - [ ] Long-running session - monitor memory usage
+- [ ] Mobile/touch devices - verify custom font rendering on canvas text
 - [ ] Mobile devices - check performance
 - [ ] Different browsers - verify compatibility
 

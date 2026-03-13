@@ -1,3 +1,5 @@
+> **DEPRECATED**: 此檔案已被 `error-index.md` + `errors/` 取代。將在未來版本移除。
+
 # Common Performance Anti-Patterns in Adobe Animate + CreateJS
 
 This reference provides a comprehensive catalog of performance anti-patterns found in Adobe Animate and CreateJS projects, with detection strategies and impact assessment.

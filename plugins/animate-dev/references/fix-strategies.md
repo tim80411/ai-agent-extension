@@ -1,3 +1,5 @@
+> **DEPRECATED**: 此檔案已被 `error-index.md` + `errors/` 取代。將在未來版本移除。
+
 # Fix Strategies and Code Examples
 
 This reference provides complete before/after code examples for fixing each performance issue, with step-by-step implementation guides.
@@ -77,7 +79,7 @@ bindSceneEventListeners: function(scene) {
   AppState.scene.clickListener = clickListener;
   scene.addEventListener("click", clickListener);
 
-  console.log("場景事件監聽器已綁定");
+  console.log("場景事件監聯器已綁定");
 },
 
 // ✅ New: Cleanup function
@@ -207,8 +209,8 @@ MapView.init(container2); // Skips (already registered)
 
 **Call cleanup on scene change:**
 ```javascript
-// sceneManager.js - handlePreviousBtn
-handlePreviousBtn: function(scene) {
+// sceneManager.js - handleBackBtn
+handleBackBtn: function(scene) {
   // Clean up event listeners
   this.unbindSceneEventListeners(AppState.scene.instance);
 
@@ -378,7 +380,7 @@ pauseTargets: {
     { prefix: "optionBtn_", max: 4 }
   ],
   mapChildren: [
-    { prefix: "location_", max: 20 }
+    { prefix: "item_", max: 20 }
   ],
   questionChildren: {
     direct: [
@@ -427,7 +429,7 @@ pauseListedMovieClips: function(scene) {
     }
   });
 
-  // Pause mapContent children
+  // Pause map children
   var mapContent = scene.mapContainer ? scene.mapContainer.mapContent : null;
   if (mapContent) {
     pauseTarget(mapContent);
