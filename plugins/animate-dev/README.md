@@ -184,11 +184,11 @@ component = null;
 ### 4. Null 檢查
 ```javascript
 // 修復前
-_thismapContent.location_1.gotoAndStop(0);
+_this.mapView.item_1.gotoAndStop(0);
 
 // 修復後
-if (_thismapContent && _thismapContent.location_1) {
-  _thismapContent.location_1.gotoAndStop(0);
+if (_this.mapView && _this.mapView.item_1) {
+  _this.mapView.item_1.gotoAndStop(0);
 }
 ```
 
