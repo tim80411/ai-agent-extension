@@ -1,0 +1,9 @@
+{
+  "name": "tunnelbox-cli",
+  "version": "0.1.0",
+  "description": "TunnelBox CLI usage guide — manage local static sites, servers, and Cloudflare tunnels via the tunnelbox command",
+  "author": {
+    "name": "Timothy Liao",
+    "email": "tim80411@gmail.com"
+  }
+}
