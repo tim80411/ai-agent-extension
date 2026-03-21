@@ -61,27 +61,34 @@ echo "📦 Packaging: $SOURCE_FOLDER -> $ZIP_PATH"
     -x "*/.env.*" \
 )
 
-# --- Archive old files in parent folder ---
+# --- Archive old files ---
 if [ -n "$PARENT_FOLDER_ID" ]; then
-    echo "🗂️  Archiving old files to 'old' folder..."
+    echo "📂 Archiving old files matching '$PROJECT_NAME'..."
 
-    # Check if 'old' folder already exists
-    OLD_FOLDER_ID=$(gdrive files list --parent "$PARENT_FOLDER_ID" --skip-header --query "name = 'old' and mimeType = 'application/vnd.google-apps.folder' and trashed = false" 2>/dev/null | head -1 | cut -f1)
+    OLD_FOLDER_ID=$(gdrive files list --skip-header \
+        --query "'$PARENT_FOLDER_ID' in parents and name = 'old' and mimeType = 'application/vnd.google-apps.folder' and trashed = false" \
+        | head -1 | cut -f1)
 
     if [ -z "$OLD_FOLDER_ID" ]; then
+        echo "   Creating 'old' folder..."
         OLD_FOLDER_ID=$(gdrive files mkdir --print-only-id --parent "$PARENT_FOLDER_ID" "old")
-        echo "  Created 'old' folder: $OLD_FOLDER_ID"
     fi
 
-    # Move files matching the same project name prefix into 'old'
-    OLD_FILES=$(gdrive files list --parent "$PARENT_FOLDER_ID" --skip-header --full-name --query "name contains '${PROJECT_NAME}' and trashed = false" 2>/dev/null || true)
-    if [ -n "$OLD_FILES" ]; then
-        echo "$OLD_FILES" | while IFS=$'\t' read -r fid fname ftype fsize fcreated; do
-            echo "  Moving: $fname -> old/"
-            gdrive files move "$fid" "$OLD_FOLDER_ID" 2>/dev/null || echo "  ⚠️  Failed to move: $fname"
-        done
+    if [ -n "$OLD_FOLDER_ID" ]; then
+        OLD_FILES=$(gdrive files list --skip-header --full-name \
+            --query "'$PARENT_FOLDER_ID' in parents and name contains '$PROJECT_NAME' and trashed = false" \
+            2>/dev/null || true)
+
+        if [ -n "$OLD_FILES" ]; then
+            echo "$OLD_FILES" | while IFS=$'\t' read -r fid fname _rest; do
+                echo "   Moving: $fname -> old/"
+                gdrive files move "$fid" "$OLD_FOLDER_ID" 2>/dev/null || echo "   ⚠️  Failed to move: $fname"
+            done
+        else
+            echo "   No old files to archive."
+        fi
     else
-        echo "  No old files for '${PROJECT_NAME}' to archive."
+        echo "⚠️  Could not create/find 'old' folder, skipping archive" >&2
     fi
 fi
 

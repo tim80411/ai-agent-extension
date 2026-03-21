@@ -67,8 +67,8 @@ If uploading to a parent folder, move existing files to an `old` subfolder first
 
 ```bash
 # Check if 'old' folder exists in parent
-OLD_FOLDER_ID=$(gdrive files list --parent "<PARENT_FOLDER_ID>" --skip-header \
-  --query "name = 'old' and mimeType = 'application/vnd.google-apps.folder' and trashed = false" \
+OLD_FOLDER_ID=$(gdrive files list --skip-header \
+  --query "'<PARENT_FOLDER_ID>' in parents and name = 'old' and mimeType = 'application/vnd.google-apps.folder' and trashed = false" \
   | head -1 | cut -f1)
 
 # Create 'old' folder if not found
@@ -77,11 +77,16 @@ if [ -z "$OLD_FOLDER_ID" ]; then
 fi
 
 # Move files matching the same project name into 'old'
-gdrive files list --parent "<PARENT_FOLDER_ID>" --skip-header --full-name \
-  --query "name contains '<PROJECT_NAME>' and trashed = false" \
-  | while IFS=$'\t' read -r fid rest; do
+OLD_FILES=$(gdrive files list --skip-header --full-name \
+  --query "'<PARENT_FOLDER_ID>' in parents and name contains '<PROJECT_NAME>' and trashed = false" \
+  2>/dev/null || true)
+
+if [ -n "$OLD_FILES" ]; then
+  echo "$OLD_FILES" | while IFS=$'\t' read -r fid fname _rest; do
+      echo "Moving: $fname -> old/"
       gdrive files move "$fid" "$OLD_FOLDER_ID"
     done
+fi
 ```
 
 ### 7. Package
