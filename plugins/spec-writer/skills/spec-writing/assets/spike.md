@@ -1,3 +1,16 @@
+---
+story_id: ＿＿
+title: "＿＿"
+type: spike
+priority: P_
+labels: []
+tracker_type: ＿＿
+tracker_id: ＿＿
+synced_at: ＿＿
+---
+
+# [Spike] ＿＿
+
 h2. 目的
 
 評估＿＿的可行性，以判斷＿＿。
@@ -13,7 +26,7 @@ h2. 產出
 
 h2. 前置條件
 
-* PROJ-N（Story N — 名稱）完成
+* Story N — 名稱（完成）
 
 h2. 優先序
 

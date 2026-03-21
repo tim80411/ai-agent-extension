@@ -1,3 +1,16 @@
+---
+story_id: ＿＿
+title: "＿＿"
+type: user-story
+priority: P_
+labels: []
+tracker_type: ＿＿
+tracker_id: ＿＿
+synced_at: ＿＿
+---
+
+# [Story ＿＿] ＿＿
+
 h2. 描述
 
 身為＿＿，我需要＿＿，以便＿＿。
@@ -27,7 +40,7 @@ THEN ＿＿
 
 h2. 依賴
 
-* PROJ-N（Story N — 名稱）說明依賴原因
+* Story N — 名稱（說明依賴原因）
 
 h2. 優先序
 

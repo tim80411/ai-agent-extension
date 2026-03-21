@@ -25,6 +25,7 @@ description: >-
 - [ ] Phase 0.5: Story Decomposition（若需要全局拆解）
 - [ ] Phase 1: Requirement Clarification
 - [ ] Phase 2: Story Writing
+- [ ] Phase 2.5: Tracker Sync（將 Stories 同步到 Issue Tracker）
 - [ ] Phase 3: Quality Review
 
 ---
@@ -194,13 +195,68 @@ description: >-
 
    f. **標記 Labels 與優先序**（參照 `references/04-prioritization.md`）。
 
+   g. **寫入檔案**：每個 Story 獨立寫入一個 `.md` 檔案（參照 `references/08-workflow-conventions.md` 的檔案結構規範）：
+      - 檔案路徑：使用者指定的 spec 目錄（如 `.project/specs/{spec-slug}/`）
+      - 檔名格式：`story-{N}-{slug}.md`（Spike 為 `spike-{slug}.md`）
+      - 若該目錄下尚無 `_overview.md`，一併建立（包含 Story Map、優先序總覽、No-gos、修訂紀錄）
+      - Frontmatter 中 `story_id`、`title`、`type`、`priority` 必須填入
+      - Frontmatter 中 `tracker_type`、`tracker_id`、`synced_at` 留空（Phase 2.5 填入）
+
 3. 完成所有 Stories 草稿後，以清晰格式呈現給使用者確認。
 
 4. 若使用者要求修改，根據反饋調整並再次確認。
 
-5. **DO NOT PROCEED TO PHASE 3 UNTIL THE USER EXPLICITLY APPROVES THE DRAFT.**
+5. **DO NOT PROCEED TO PHASE 2.5 UNTIL THE USER EXPLICITLY APPROVES THE DRAFT.**
 
 6. 更新 todo，標記 Phase 2 完成。
+
+---
+
+## Phase 2.5: Tracker Sync
+
+**Goal**: 將確認的 Stories 同步到 Issue Tracker（Linear / Jira），並將外部 ID 寫回 frontmatter。
+
+**何時觸發**：Phase 2 使用者確認草稿後自動進入。
+
+**何時跳過**：
+- 使用者明確表示不需要 sync
+- 環境中沒有可用的 Issue Tracker MCP 工具
+
+**Actions**:
+
+1. 使用 `AskUserQuestion` 詢問使用者：
+   - 是否要同步到 Issue Tracker？
+   - 若是，使用哪個 Tracker？（Linear / Jira）
+   - 目標 Project 名稱？（若 Tracker 已連線，可列出可用的 Projects 供選擇）
+
+2. **等待使用者回答後再繼續。**
+
+3. 若使用者選擇同步：
+
+   a. **檢查既有映射**：讀取每個 Story 檔案的 frontmatter：
+      - 若已有 `tracker_id` → 比對 `synced_at` 與 Tracker 的 `updatedAt`
+        - Tracker 較新 → 先 pull 最新狀態（更新本地 frontmatter）
+        - 本地較新或相同 → 直接 push 更新
+      - 若無 `tracker_id` → 建立新 issue
+
+   b. **建立 / 更新 Issues**：透過 MCP 工具（如 `mcp__plugin_linear_linear__save_issue`）：
+      - title: Story 標題
+      - description: Story 全文內容（h2 區段）
+      - priority: 依 frontmatter `priority` 對應（P0→Urgent, P1→High, P2→Medium, P3→Low）
+      - labels: 依 `type` 和 `priority` 設定
+      - project: 使用者指定的 Project
+      - milestone: 若可辨識所屬 Spec 名稱，設定對應 Milestone
+
+   c. **寫回 frontmatter**：將 Tracker 回傳的 ID 和時間寫入每個 Story 檔案：
+      ```yaml
+      tracker_type: linear
+      tracker_id: TIM-51
+      synced_at: 2026-03-21T07:06:51Z
+      ```
+
+4. 向使用者呈現同步結果（建立了哪些 issues、更新了哪些）。
+
+5. 更新 todo，標記 Phase 2.5 完成。
 
 ---
 
@@ -259,8 +315,14 @@ Phase 1: Requirement Clarification
 
 Phase 2: Story Writing
   ↓ Per requirement: classify → read template → fill → assign ID → label
+  ↓ Write each Story to individual .md file with frontmatter
   ↓ Present draft to user
   ↓ GATE: user satisfied with draft
+
+Phase 2.5: Tracker Sync
+  ↓ AskUserQuestion (sync to tracker? which one? which project?)
+  ├── 是 → Create/update issues via MCP → write back tracker_id to frontmatter
+  └── 否 → skip
 
 Phase 3: Quality Review
   ↓ [spec-reviewer agent]

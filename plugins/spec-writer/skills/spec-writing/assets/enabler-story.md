@@ -1,3 +1,16 @@
+---
+story_id: ＿＿
+title: "＿＿"
+type: enabler
+priority: P_
+labels: []
+tracker_type: ＿＿
+tracker_id: ＿＿
+synced_at: ＿＿
+---
+
+# [Story ＿＿] ＿＿ (Enabler)
+
 h2. 描述
 
 作為開發團隊，我們需要＿＿，使＿＿。
@@ -34,7 +47,7 @@ h2. 不含（Out of Scope）
 
 h2. 依賴
 
-* PROJ-N（Story N — 名稱）說明依賴原因
+* Story N — 名稱（說明依賴原因）
 
 h2. 優先序
 
