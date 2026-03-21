@@ -16,7 +16,8 @@ Use this index to match user symptoms to specific error detail files. Read only 
 | ERR-LIB-VS-UNDERSCORELIB | lib vs _lib Confusion | `lib.MyComponent` undefined, 元件找不到, timing issue, 載入時機, intermittent undefined | `errors/err-lib-vs-underscorelib.md` |
 | ERR-MISSING-TICKER | Missing Stage Ticker | nothing animates, 畫面凍結, stage not updating, 動畫不播放, application frozen, Ticker 沒設定 | `errors/err-missing-ticker.md` |
 | ERR-NULL-PATH | Null Path References | `Cannot read property of undefined`, 路徑錯誤, nested component not found, 元件路徑無效 | `errors/err-null-path.md` |
-| ERR-CANVAS-FONT | Canvas Text Font Issues | 字體不顯示, font not showing on mobile, 觸屏字體問題, custom font fallback, 平板字體錯誤 | `errors/err-canvas-font.md` |
+| ERR-CANVAS-FONT | Canvas Text Font Issues | 字體不顯示, font not showing on mobile, 觸屏字體問題, custom font fallback, 平板字體錯誤, iOS 18 CJK 加粗 | `errors/err-canvas-font.md` |
+| ERR-CJK-PATH-RESOURCE | CJK/中文路徑資源載入失敗 | 中文檔名, 中文路徑, iPad Safari 404, 音效載入失敗, 圖片不顯示, percent-encoding, URL 編碼, 資源載入異常, Safari 資源載入 | `errors/err-cjk-path-resource.md` |
 
 ## Performance Anti-Patterns
 

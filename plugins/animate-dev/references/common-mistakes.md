@@ -459,6 +459,9 @@ Before deploying Adobe Animate + CreateJS project:
 - [ ] Stage ticker is set up
 - [ ] lib/_lib usage appropriate for timing
 - [ ] Canvas text 自訂字體使用 buildNewFont 覆蓋，確保與 @font-face 名稱一致
+- [ ] 所有資源檔名（音效、圖片、字體）為 ASCII，不含中文/CJK 字元
+- [ ] CSS 有 `@charset "utf-8"` 聲明
+- [ ] HTML 有 `lang` 屬性（如 `lang="zh-TW"`）
 
 ## Testing Checklist
 
@@ -470,6 +473,8 @@ After fixing issues:
 - [ ] Navigate through all scenes - check frame control
 - [ ] Long-running session - monitor memory usage
 - [ ] Mobile/touch devices - verify custom font rendering on canvas text
+- [ ] iPad Safari - verify all resources load (no 404 from Chinese paths)
+- [ ] iOS 18 iPad - verify CJK text not unexpectedly bold
 - [ ] Mobile devices - check performance
 - [ ] Different browsers - verify compatibility
 
