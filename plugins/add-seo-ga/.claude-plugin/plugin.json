@@ -1,0 +1,9 @@
+{
+  "name": "add-seo-ga",
+  "version": "1.0.0",
+  "description": "在 HTML 文件的 <head> 區段加入完整的 SEO 標籤結構和 Google Analytics 追蹤代碼",
+  "author": {
+    "name": "Timothy Liao"
+  },
+  "keywords": ["seo", "meta-tags", "open-graph", "google-analytics", "gtag", "html"]
+}
