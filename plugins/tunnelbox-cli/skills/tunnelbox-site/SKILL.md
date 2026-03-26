@@ -10,7 +10,7 @@ description: >-
 
 # TunnelBox Site Management
 
-管理 TunnelBox 靜態站台（add / list / remove）。全程使用中文回應（除非使用者用英文提問）。
+管理 TunnelBox 站台（靜態 / Proxy 模式的 add / list / remove）。全程使用中文回應（除非使用者用英文提問）。
 
 ## 指令參考
 
@@ -27,11 +27,16 @@ tunnelbox site add <name> <folder>
 ```bash
 tunnelbox site add <name> --proxy <url>
 ```
-- `--proxy <url>` — 代理目標 URL（如 `http://localhost:3000`）
+- `--proxy <url>` — 代理目標 URL（如 `http://localhost:3000`），僅接受 `http:` / `https:` 協定
 
-**JSON 輸出範例：**
+**JSON 輸出範例（靜態模式）：**
 ```json
 { "success": true, "data": { "id": "uuid", "name": "my-blog", "serveMode": "static", "folderPath": "/abs/path/dist" } }
+```
+
+**JSON 輸出範例（Proxy 模式）：**
+```json
+{ "success": true, "data": { "id": "uuid", "name": "my-api", "serveMode": "proxy", "proxyTarget": "http://localhost:3000" } }
 ```
 
 ### 列出所有站台
@@ -44,12 +49,23 @@ tunnelbox site list --json
 - 無站台時輸出 `No items found.`
 - 有站台時輸出表格，欄位：name, mode, folder/target, id
 
+**JSON 輸出範例：**
+```json
+{ "success": true, "data": [ { "id": "uuid", "name": "my-blog", "serveMode": "static", "folderPath": "/abs/path" }, ... ] }
+```
+- 無站台時 `data` 為空陣列 `[]`
+
 ### 移除站台
 
 ```bash
-tunnelbox site remove <nameOrId>
+tunnelbox site remove <nameOrId> --json
 ```
 - 可用站台名稱或 UUID
+
+**JSON 輸出範例：**
+```json
+{ "success": true, "data": { "id": "uuid", "name": "my-blog", "serveMode": "static", "folderPath": "/abs/path" } }
+```
 
 ## 執行步驟
 
@@ -70,8 +86,9 @@ tunnelbox site remove <nameOrId>
 4. 解析 JSON 輸出，向使用者回報站台名稱、ID、資料夾路徑（或 proxy 目標）。
 5. 若失敗，根據錯誤訊息說明原因：
    - `Folder not found` — 資料夾不存在，確認路徑是否正確
+   - `Folder path is required for static sites` — 靜態模式未提供資料夾路徑
    - `Site name already exists` — 名稱重複，建議換一個名稱
-   - `Invalid proxy URL` — proxy URL 格式不正確
+   - `Invalid proxy URL` — proxy URL 格式不正確（僅接受 http/https）
 
 ### 列出站台
 
