@@ -22,6 +22,7 @@ Look for folders containing `index.html` in the workspace:
 
 Do NOT just use the folder name. Run the following commands **from the workspace root** (or the detected static site folder) to gather clues:
 
+**macOS/Linux:**
 ```bash
 # Check package.json name
 python3 -c "import json; print(json.load(open('package.json')).get('name',''))" 2>/dev/null
@@ -33,7 +34,21 @@ with open('index.html') as f:
     m = re.search(r'<title>(.*?)</title>', f.read(), re.IGNORECASE)
     if m: print(m.group(1))
 " 2>/dev/null
+```
 
+**Windows (PowerShell):**
+```bash
+# Check package.json name
+powershell -NoProfile -Command "(Get-Content 'package.json' | ConvertFrom-Json).name" 2>/dev/null
+
+# Check HTML title
+powershell -NoProfile -Command "
+  [regex]::Match((Get-Content -Raw 'index.html'), '<title>(.*?)</title>').Groups[1].Value
+" 2>/dev/null
+```
+
+**Cross-platform:**
+```bash
 # Check README first heading (supports both README.md and README)
 head -5 README.md README 2>/dev/null | grep -m1 '^#' | sed 's/^#* *//'
 
@@ -45,13 +60,11 @@ Synthesize a concise product name in snake_case from the gathered information, t
 
 ### 4. Get Serial Number
 
-```bash
-python3 "<SKILL_DIR>/scripts/get-serial.py" "<PROJECT_NAME>"
-```
+The `deploy.sh` script handles serial numbers automatically. It detects the platform:
+- **macOS/Linux**: uses `python3 get-serial.py`
+- **Windows**: uses PowerShell inline to read/write `serial.json`
 
-`<SKILL_DIR>` is the directory containing this skill's SKILL.md file.
-
-Returns the next serial number. Auto-creates/updates `~/.config/gdrive-deploy/serial.json`.
+Serial file: `~/.config/gdrive-deploy/serial.json`
 
 ### 5. Read Config (Optional)
 
@@ -77,13 +90,14 @@ if [ -z "$OLD_FOLDER_ID" ]; then
 fi
 
 # Move files matching the same project name into 'old'
-OLD_FILES=$(gdrive files list --skip-header --full-name \
+OLD_FILES=$(gdrive files list --skip-header \
   --query "'<PARENT_FOLDER_ID>' in parents and name contains '<PROJECT_NAME>' and trashed = false" \
   2>/dev/null || true)
 
 if [ -n "$OLD_FILES" ]; then
-  echo "$OLD_FILES" | while IFS=$'\t' read -r fid fname _rest; do
-      echo "Moving: $fname -> old/"
+  echo "$OLD_FILES" | while read -r line; do
+      fid=$(echo "$line" | awk '{print $1}')
+      echo "Moving: $fid -> old/"
       gdrive files move "$fid" "$OLD_FOLDER_ID"
     done
 fi
@@ -91,6 +105,7 @@ fi
 
 ### 7. Package
 
+**macOS/Linux:**
 ```bash
 cd "<PARENT_DIR_OF_TARGET>"
 zip -r "/tmp/<FILENAME>.zip" "<TARGET_FOLDER_NAME>" \
@@ -102,6 +117,9 @@ zip -r "/tmp/<FILENAME>.zip" "<TARGET_FOLDER_NAME>" \
   -x "*/.env" \
   -x "*/.env.*"
 ```
+
+**Windows (via deploy.sh):**
+Uses PowerShell `Compress-Archive` with `robocopy` for exclusions. The script writes a temp `.ps1` file to avoid encoding issues with CJK characters in paths.
 
 ### 8. Upload & Share
 
@@ -120,7 +138,13 @@ gdrive permissions share "$FILE_ID"
 
 ```bash
 SHARE_LINK="https://drive.google.com/file/d/<FILE_ID>/view?usp=sharing"
+
+# macOS
 echo -n "$SHARE_LINK" | pbcopy
+
+# Windows
+echo -n "$SHARE_LINK" | clip
+
 echo "📋 連結已複製到剪貼簿"
 ```
 
@@ -134,11 +158,12 @@ rm "/tmp/<FILENAME>.zip"
 
 | Error | Action |
 |-------|--------|
-| gdrive not installed | Tell user: `brew install gdrive` |
+| gdrive not installed | macOS: `brew install gdrive` / Windows: download from GitHub Releases |
 | No account | Tell user: `gdrive account add` |
 | No index.html found | Ask user to specify the static web folder path |
 | Upload fails | Check network, retry once, then report error |
 | Multiple index.html candidates | Present options and ask user to choose |
+| python3 not found (Windows) | Script auto-detects Windows and uses PowerShell instead |
 
 ## gdrive v3 Command Reference
 

@@ -9,8 +9,10 @@ Package a static website project and upload it to Google Drive with a shareable 
 
 ## Prerequisites
 
-- `gdrive` CLI v3 (`brew install gdrive`)
+- `gdrive` CLI v3 (macOS: `brew install gdrive` / Windows: [GitHub Releases](https://github.com/glotlabs/gdrive/releases))
 - `gdrive` authenticated (`gdrive account add`)
+- macOS: `python3` (system default), `zip`, `pbcopy`
+- Windows: `PowerShell` (system default), `robocopy`, `clip`
 
 ## Quick Workflow
 
