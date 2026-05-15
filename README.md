@@ -38,6 +38,13 @@ Spec/Story 撰寫方法論 — 引導撰寫高品質 User Story 與 Enabler Stor
 - **Agents**: codebase-explorer, context-reader, spec-reviewer
 - **Version:** 0.1.0
 
+### k8s-troubleshooter
+
+Diagnose Kubernetes alerts and warning events on Tim's OCI cluster. Fetches alertmanager details, pulls relevant kubectl context based on alert type, and proposes fixes. Designed to be invoked via Homepage alertmanager widget deep links.
+
+- **Skills**: `k8s-alert-investigate`
+- **Version:** 0.1.0
+
 ## Installation
 
 This marketplace is automatically loaded from:

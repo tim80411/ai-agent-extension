@@ -159,6 +159,21 @@
       "category": "development",
       "keywords": ["converter", "markdown", "pdf", "mermaid", "data"],
       "strict": false
+    },
+    {
+      "name": "k8s-troubleshooter",
+      "source": "./plugins/k8s-troubleshooter",
+      "description": "Diagnose Kubernetes alerts and warning events on Tim's OCI cluster — fetches alertmanager details, pulls relevant kubectl context, and proposes fixes",
+      "version": "0.1.0",
+      "author": {
+        "name": "Timothy Liao",
+        "email": "tim80411@gmail.com"
+      },
+      "repository": "https://github.com/tim80411/ai-agent-extension",
+      "license": "MIT",
+      "category": "ops",
+      "keywords": ["kubernetes", "k8s", "alertmanager", "prometheus", "oci", "incident", "troubleshooting"],
+      "strict": false
     }
   ]
 }
