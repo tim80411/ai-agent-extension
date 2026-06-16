@@ -1,0 +1,9 @@
+{
+  "name": "workflow-lab",
+  "version": "0.1.0",
+  "description": "Park expensive multi-agent Workflow ideas as ready-to-run scripts, then pull one out and run it later behind a cost gate. Two skills: workflow-capture (record) and workflow-run (run).",
+  "author": {
+    "name": "Timothy Liao",
+    "email": "tim80411@gmail.com"
+  }
+}
