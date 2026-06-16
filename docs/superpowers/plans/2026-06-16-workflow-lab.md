@@ -572,11 +572,21 @@ return { summary: r }
 
 Run:
 ```bash
+WF="$HOME/workflow-lab/_smoke-test/workflow.js"
 test -f "$HOME/workflow-lab/_smoke-test/README.md" && test -d "$HOME/workflow-lab/_smoke-test/runs" && echo "structure OK"
-grep -q "const CONFIG" "$HOME/workflow-lab/_smoke-test/workflow.js" && ! grep -q "args" "$HOME/workflow-lab/_smoke-test/workflow.js" && echo "no-args OK"
-cp "$HOME/workflow-lab/_smoke-test/workflow.js" /tmp/wf-check.mjs && node --check /tmp/wf-check.mjs && echo "syntax OK"
+# CONFIG present, and `args` is NOT used as a code identifier (it may appear in a comment).
+grep -q "const CONFIG" "$WF" && ! grep -nE '(^|[^a-zA-Z_.])args[.\[]|[^a-zA-Z_.]args[^a-zA-Z_]' "$WF" | grep -qv '//' && echo "no-args OK"
+# Faithful syntax check: workflow bodies use top-level return/await, which only parse
+# inside the harness's async wrapper — so wrap before `node --check` (raw .mjs gives a
+# false "Illegal return statement").
+if command -v node >/dev/null 2>&1; then
+  python3 -c "src=open('$WF').read(); open('/tmp/wf-wrapped.mjs','w').write('async function __wf(){\n'+src.replace('export const meta','const meta')+'\n}\n')"
+  node --check /tmp/wf-wrapped.mjs && echo "syntax OK" && rm -f /tmp/wf-wrapped.mjs
+else
+  echo "node unavailable — skipping syntax check"
+fi
 ```
-Expected: `structure OK`, `no-args OK`, `syntax OK`. (If `node` is unavailable, skip the syntax line.)
+Expected: `structure OK`, `no-args OK`, `syntax OK`.
 
 - [ ] **Step 4: Clean up the smoke test**
 
