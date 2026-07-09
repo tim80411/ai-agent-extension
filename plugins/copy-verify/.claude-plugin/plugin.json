@@ -1,0 +1,12 @@
+{
+  "name": "copy-verify",
+  "version": "1.0.0",
+  "description": "Verify and align an app's user-facing copy against a per-project terminology SSOT — a guard-first loop that catches banned/inconsistent terms, engineering-jargon leaks, and raw backend errors reaching users. Covers both incremental (glossary exists) and bootstrap (stand one up) modes.",
+  "author": {
+    "name": "Timothy Liao",
+    "email": "tim80411@gmail.com"
+  },
+  "repository": "https://github.com/tim80411/ai-agent-extension",
+  "license": "MIT",
+  "keywords": ["copy", "microcopy", "glossary", "terminology", "i18n", "localization", "ux-writing", "文案", "禁用詞", "術語統一", "consistency-guard"]
+}

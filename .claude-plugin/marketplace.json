@@ -189,6 +189,21 @@
       "category": "productivity",
       "keywords": ["workflow", "multi-agent", "orchestration", "idea-park", "automation"],
       "strict": false
+    },
+    {
+      "name": "copy-verify",
+      "source": "./plugins/copy-verify",
+      "description": "Verify and align an app's user-facing copy against a per-project terminology SSOT — a guard-first loop that catches banned/inconsistent terms, engineering-jargon leaks, and raw backend errors reaching users. Covers incremental and bootstrap modes.",
+      "version": "1.0.0",
+      "author": {
+        "name": "Timothy Liao",
+        "email": "tim80411@gmail.com"
+      },
+      "repository": "https://github.com/tim80411/ai-agent-extension",
+      "license": "MIT",
+      "category": "development",
+      "keywords": ["copy", "microcopy", "glossary", "terminology", "i18n", "localization", "ux-writing", "文案", "禁用詞", "術語統一"],
+      "strict": false
     }
   ]
 }
