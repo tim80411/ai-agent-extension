@@ -204,6 +204,21 @@
       "category": "development",
       "keywords": ["copy", "microcopy", "glossary", "terminology", "i18n", "localization", "ux-writing", "文案", "禁用詞", "術語統一"],
       "strict": false
+    },
+    {
+      "name": "pm-toolkit",
+      "source": "./plugins/pm-toolkit",
+      "description": "個人專案管理工具集：file-based-issues（操作檔案式／本地化 issue tracker 的通用方法論——建單／結構／修改／模板／狀態對帳，discover-then-apply）",
+      "version": "0.1.0",
+      "author": {
+        "name": "Timothy Liao",
+        "email": "tim80411@gmail.com"
+      },
+      "repository": "https://github.com/tim80411/ai-agent-extension",
+      "license": "MIT",
+      "category": "development",
+      "keywords": ["project-management", "issue-tracker", "file-based", "local-issues", "backlog", "methodology", "建單", "需求單"],
+      "strict": false
     }
   ]
 }
