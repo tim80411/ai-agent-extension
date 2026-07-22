@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "Diagnose Kubernetes alerts and warning events on Tim's OCI cluster — fetches alertmanager details, pulls relevant kubectl context, and proposes fixes.",
   "author": {
-    "name": "tim80411"
+    "name": "Timothy Liao",
+    "email": "tim80411@gmail.com"
   }
 }

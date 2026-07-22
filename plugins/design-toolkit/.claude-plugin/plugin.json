@@ -1,0 +1,12 @@
+{
+  "name": "design-toolkit",
+  "version": "0.1.0",
+  "description": "設計工具集：目前收錄 figma-read（透過連結讀取 Figma 設計稿，抽取結構化版面摘要，最小化 context 用量）",
+  "author": {
+    "name": "Timothy Liao",
+    "email": "tim80411@gmail.com"
+  },
+  "repository": "https://github.com/tim80411/ai-agent-extension",
+  "license": "MIT",
+  "keywords": ["design", "figma", "ui-layout", "context-optimization"]
+}

@@ -1,0 +1,12 @@
+{
+  "name": "marketing-toolkit",
+  "version": "1.0.0",
+  "description": "行銷工具集：目前收錄 add-seo-ga（在 HTML <head> 加入完整 SEO 標籤結構與 Google Analytics 追蹤碼）",
+  "author": {
+    "name": "Timothy Liao",
+    "email": "tim80411@gmail.com"
+  },
+  "repository": "https://github.com/tim80411/ai-agent-extension",
+  "license": "MIT",
+  "keywords": ["marketing", "seo", "meta-tags", "open-graph", "google-analytics", "gtag", "html"]
+}
