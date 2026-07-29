@@ -199,6 +199,19 @@ export function renderProfileBlock(inf) {
     `    sections: ${yamlValue(inf.sections)}`,
   );
   if (inf.createCmd) L.push(`    create_cmd: ${yamlValue(inf.createCmd)}`);
+  if (inf.reconcileCmd) L.push(`    reconcile_cmd: ${yamlValue(inf.reconcileCmd)}`);
+  // 這三個原本寫不出來，使用者得事後手改設定檔——schema 有支援就該讓 add 寫得進去。
+  // 只在明確給了值時才寫，避免把預設值固化進每個 profile。
+  if (inf.requireExistingGroup !== undefined && inf.requireExistingGroup !== null) {
+    L.push(`    require_existing_group: ${yamlValue(inf.requireExistingGroup)}`);
+  }
+  if (inf.recordBranch !== undefined && inf.recordBranch !== null) {
+    L.push(`    record_branch: ${yamlValue(inf.recordBranch)}`);
+  }
+  if (Object.keys(inf.frontmatterExtra ?? {}).length) {
+    L.push(`    frontmatter_extra:`);
+    for (const [k, v] of Object.entries(inf.frontmatterExtra)) L.push(`      ${k}: ${yamlValue(v)}`);
+  }
   return L.join('\n');
 }
 

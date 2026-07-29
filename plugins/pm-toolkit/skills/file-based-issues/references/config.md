@@ -71,6 +71,7 @@ profiles:
 | `status.enum` | `[Backlog, Todo, In Progress, Done]` | 合法值；`initial`／`done` 不在裡面會直接擋下 |
 | `sections` | `["背景", "AC", "範圍外"]` | `index.md` 的內文分段 |
 | `create_cmd` | `null` | 專案自帶的建立工具。設了之後內建發號會**讓位**（exit 3），除非 `--force` |
+| `reconcile_cmd` | `null` | 專案自帶的對帳工具。設了之後內建對帳會**讓位**（exit 3），除非 `--force` |
 | `record_branch` | `true` | 是否記 `git_branch:` |
 | `frontmatter_extra` | `{}` | 額外固定欄位，原樣寫進 frontmatter |
 

@@ -15,6 +15,8 @@ head_() { printf '\n== %s ==\n' "$1"; }
 export PM_TOOLKIT_CONFIG="$WORK/config.yaml"
 NEW="node $HERE/issue-new.mjs"
 CFG="node $HERE/pm-config.mjs"
+CHK="node $HERE/issue-check.mjs"
+REC="node $HERE/issue-reconcile.mjs"
 
 mkdir -p "$WORK"
 cat > "$PM_TOOLKIT_CONFIG" <<'YAML'
@@ -212,6 +214,79 @@ head_ "status enum 一致性"
 printf 'profiles:\n  demo:\n    id_prefix: X\n    status:\n      initial: Nope\n      enum: [Backlog, Done]\n' > "$WORK/bad3.yaml"
 OUT=$(PM_TOOLKIT_CONFIG="$WORK/bad3.yaml" $CFG list 2>&1)
 grep -q 'status.initial' <<<"$OUT" && ok "initial 不在 enum 內時擋下" || bad "enum 檢查" "$OUT"
+
+head_ "issue-check：乾淨的 tracker 應該通過"
+OUT=$(cd "$WORK/demo" && $CHK 2>&1); RC=$?
+[[ $RC -eq 0 ]] && ok "issue-new 產出的卡本身就合格（骨架與稽核期待同一組欄位）" || bad "乾淨卻不通過" "$OUT"
+
+head_ "issue-check：每一種漂移都抓得到"
+CARD="$WORK/demo/issues/uncategorized/$(ls "$WORK/demo/issues/uncategorized" | head -1)/index.md"
+cp "$CARD" "$WORK/card.bak"
+mut() { sed -i.bak "$1" "$CARD" && rm -f "$CARD.bak"; }
+chk() { (cd "$WORK/demo" && $CHK 2>&1); }
+
+mut 's/^status: Backlog$/status: 亂寫的/'
+grep -q '不在 enum' <<<"$(chk)" && ok "status 不在 enum" || bad "status enum 未抓到" "$(chk)"
+cp "$WORK/card.bak" "$CARD"
+
+mut 's/^milestone: uncategorized$/milestone: m1/'
+grep -q 'layer-1 資料夾' <<<"$(chk)" && ok "grouping 欄與資料夾不符（搬檔沒改欄）" || bad "grouping 漂移未抓到" "$(chk)"
+cp "$WORK/card.bak" "$CARD"
+
+mut 's/^status: Backlog$/status: Done/'
+grep -q 'completed 空白' <<<"$(chk)" && ok "Done 卻沒有 completed" || bad "done⇔completed 未抓到" "$(chk)"
+cp "$WORK/card.bak" "$CARD"
+
+mut '/^labels: /d'
+grep -q '缺 frontmatter 欄位' <<<"$(chk)" && ok "frontmatter 缺欄" || bad "缺欄未抓到" "$(chk)"
+cp "$WORK/card.bak" "$CARD"
+
+mut 's/^blocks: \[\]$/blocks: [DEMO-2]/'
+grep -q 'blocked_by 沒有' <<<"$(chk)" && ok "單向關係欄（A blocks B 但 B 沒回指）" || bad "單向關係未抓到" "$(chk)"
+cp "$WORK/card.bak" "$CARD"
+
+mut 's/^blocks: \[\]$/blocks: [DEMO-999]/'
+grep -q 'DEMO-999 不存在' <<<"$(chk)" && ok "關係欄指向不存在的 ID" || bad "懸空關係未抓到" "$(chk)"
+cp "$WORK/card.bak" "$CARD"
+
+printf '# INDEX\n\nDEMO-1 在這裡，DEMO-404 是幽靈\n' > "$WORK/demo/issues/INDEX.md"
+OUT=$(chk)
+grep -q 'INDEX.md 提到 DEMO-404' <<<"$OUT" && ok "INDEX 提到不存在的卡" || bad "INDEX 幽靈未抓到" "$OUT"
+grep -q '沒有出現在 INDEX.md' <<<"$OUT" && ok "卡沒出現在 INDEX" || bad "INDEX 漏卡未抓到" "$OUT"
+rm -f "$WORK/demo/issues/INDEX.md"
+(cd "$WORK/demo" && $CHK >/dev/null 2>&1) && ok "還原後回到全綠（前面的檢查沒有副作用）" || bad "還原後仍失敗" "$(chk)"
+
+head_ "issue-reconcile：判準與 --fix"
+git -C "$WORK/demo" add -A >/dev/null 2>&1
+git -C "$WORK/demo" -c user.email=t@t -c user.name=t commit -q -m "chore: seed" 2>/dev/null
+git -C "$WORK/demo" -c user.email=t@t -c user.name=t commit -q --allow-empty -m "feat(x): DEMO-1 做完了"
+git -C "$WORK/demo" -c user.email=t@t -c user.name=t commit -q --allow-empty -m "docs(x): DEMO-2 補說明"
+OUT=$(cd "$WORK/demo" && $REC --released HEAD 2>&1); RC=$?
+grep -q 'DEMO-1' <<<"$OUT" && ok "feat 開頭且 subject 帶號 → 命中" || bad "應命中卻沒有" "$OUT"
+grep -q 'DEMO-2' <<<"$OUT" && bad "docs 不該命中" "$OUT" || ok "docs 開頭 → 不命中（不是實作）"
+[[ $RC -eq 1 ]] && ok "有候選未修時 exit 1" || bad "退出碼" "rc=$RC"
+
+(cd "$WORK/demo" && $REC --released HEAD --fix >/dev/null 2>&1)
+D1=$(grep -rl '^id: DEMO-1$' "$WORK/demo/issues" | head -1)
+grep -q '^status: Done$' "$D1" && ok "--fix 把 status 翻成 profile 的 done 值" || bad "--fix status" "$(cat "$D1")"
+grep -qE '^completed: [0-9]{4}-[0-9]{2}-[0-9]{2}$' "$D1" && ok "--fix 補上 completed（用 commit 日期）" || bad "--fix completed" "$(cat "$D1")"
+(cd "$WORK/demo" && $CHK >/dev/null 2>&1) && ok "--fix 後 check 仍全綠（沒破壞 done⇔completed）" || bad "--fix 後 check 失敗" "$(chk)"
+OUT=$(cd "$WORK/demo" && $REC --released HEAD 2>&1)
+grep -q 'DEMO-1' <<<"$OUT" && bad "已修的卡不該再出現" "$OUT" || ok "已修的卡不再是候選"
+
+head_ "issue-reconcile：讓位與 provider 閘門"
+$CFG add --json '{"profileName":"hasrecon","idPrefix":"HR","match":{"path":"'"$WORK"'/hasrecon"},"reconcileCmd":"pnpm issue:reconcile","status":{"initial":"Backlog","done":"Done","enum":["Backlog","Done"]},"sections":["背景"]}' >/dev/null 2>&1
+mkdir -p "$WORK/hasrecon/issues"
+OUT=$(cd "$WORK/hasrecon" && $REC 2>&1); RC=$?
+[[ $RC -eq 3 ]] && grep -q 'pnpm issue:reconcile' <<<"$OUT" && ok "有 reconcile_cmd 時讓位（exit 3）" || bad "reconcile_cmd 讓位" "rc=$RC $OUT"
+OUT=$(cd "$WORK/jirathing" && $REC 2>&1); RC=$?
+[[ $RC -eq 2 ]] && ok "非 file-based provider 被擋（exit 2）" || bad "provider 閘門" "rc=$RC $OUT"
+
+head_ "add 寫得出 schema 文件宣告的所有欄位"
+$CFG add --json '{"profileName":"fullopts","idPrefix":"FO","match":{"path":"'"$WORK"'/fullopts"},"requireExistingGroup":true,"recordBranch":false,"frontmatterExtra":{"team":"core"},"reconcileCmd":"make reconcile","status":{"initial":"Backlog","done":"Done","enum":["Backlog","Done"]},"sections":["背景"]}' >/dev/null 2>&1
+for k in require_existing_group record_branch frontmatter_extra reconcile_cmd; do
+  grep -q "$k" "$PM_TOOLKIT_CONFIG" && ok "add 寫得出 $k" || bad "add 漏寫 $k" ""
+done
 
 printf '\n────────────────────────\n通過 %d ／ 失敗 %d\n工作目錄：%s\n' "$PASS" "$FAIL" "$WORK"
 [[ $FAIL -eq 0 ]]

@@ -7,9 +7,12 @@ description: >-
   Covers the full lifecycle: 建單 with the project's collision-safe ID allocator
   (never hand-guess numbers), the issue-as-folder 結構 + frontmatter schema,
   in-place status 修改 / subtask nesting / milestone moves, the issue-body 模板,
-  and status-drift 對帳 against release tags. Ships a zero-dependency
+  and status-drift 對帳 against release tags. Ships three zero-dependency scripts: a
   collision-safe allocator (`issue-new.mjs`) for repos that have no create-script
-  of their own, driven by per-project profiles in a global config
+  of their own, a structural auditor (`issue-check.mjs`) that catches the silent
+  drift this kind of tracker accumulates (missing frontmatter fields, grouping
+  field out of sync with its folder, one-way blocks/related links, INDEX gaps),
+  and a status-drift reconciler (`issue-reconcile.mjs`), driven by per-project profiles in a global config
   (`~/.config/pm-toolkit/config.yaml`, managed via `pm-config.mjs`) that also
   records which projects use jira/github instead so they get routed away.
   It is config-first then discover-then-apply: it reads THIS repo's profile if
@@ -199,17 +202,49 @@ node ${CLAUDE_PLUGIN_ROOT}/scripts/issue-new.mjs "<title>" \
 - **搬群組（milestone/epic）**：`git mv issues/<old>/<ID>-<slug> issues/<new>/`，並同步 frontmatter 的群組欄位。
 - **關係欄位**：`related` / `blocks` / `blocked_by` 等平鋪陣列，值為 ID。
 
+## 稽核（check structural drift）
+
+這種 tracker 的錯誤都是**靜默**的：frontmatter 少一欄、搬了資料夾卻沒改 grouping 欄、
+A 寫了 `blocks: [B]` 但 B 沒回指。沒有人會報錯，只會讓之後的 grep 與工具悄悄失準。
+
+```bash
+node ${CLAUDE_PLUGIN_ROOT}/scripts/issue-check.mjs [--profile <p>] [--json]
+```
+
+依 profile 檢查七件事：frontmatter 欄位齊全、status 在 enum 內、id 唯一且與資料夾前綴一致、
+grouping 欄 == layer-1 資料夾名、`status==done` ⇔ `completed` 有值、**關係欄雙向**、
+INDEX（若有）與卡雙向都不漏。exit 0 = 乾淨、1 = 有問題。
+
+> **關係欄為什麼要求雙向**：單向的相依從另一邊 grep 看不到，而人通常只會從自己手上那張卡
+> 看出去。`A blocks B` 就要在 B 寫 `blocked_by: [A]`。
+
+**改完卡就跑一次**——它比人可靠，也適合放進 CI 擋漂移。
+
 ## 對帳（reconcile status drift）
 
-檔案式 tracker 靠人手翻狀態，必然累積「早上線卻沒翻完成」的漂移。若專案有 reconcile 工具：
+檔案式 tracker 靠人手翻狀態，必然累積「早上線卻沒翻完成」的漂移。
+
+```bash
+node ${CLAUDE_PLUGIN_ROOT}/scripts/issue-reconcile.mjs [--released <tag>] [--fix]
+```
+
+判準刻意收得很緊，**寧可漏報也不要誤報**——誤報會誘人把沒做完的卡翻成 done，
+那比漏一張沒翻的傷害大得多：
+
+- commit subject 開頭是 `feat|fix|perf|refactor`（`docs`／`chore`／`test` 不算實作）
+- 該卡 ID 是 subject 裡**第一個**出現的號（不是順帶提到的相關卡）
+- commit 已進基準 ref（預設 `origin/main` → `main` → `HEAD`；有 release tag 用 `--released`）
+- title 開頭 `[Epic]` 一律排除——母單只上線一片也會命中
 
 **Actions**：
-- 先跑**唯讀報告**模式盤點候選（通常有個 `--fix` 開關做自動修）。
-- 高精度判準通常是：status 仍未完成，但同名 ID 的**實作 commit**（`feat|fix|perf|refactor` 開頭、
-  且該 ID 是 commit subject 第一個號）已進某個 release tag。
-- **⚠ 候選 ≠ 一定該完成**：母單/Epic 只上線一片也會命中。自動修前先確認該 issue 範圍**全數完成**，
-  改完 `git diff` 檢視再 commit。
-- 沒有工具時，此步是人工 tidy-up；別自己臆測完成，需有 commit/release 證據。
+- 先跑**唯讀報告**盤點候選（有候選時 exit 1）。
+- **⚠ 候選 ≠ 一定該完成**：增量修復也會命中。`--fix` 前先確認該 issue 範圍**全數完成**，
+  改完 `git diff` 檢視再 commit，並同步 INDEX。
+- profile 設了 `reconcile_cmd` 時內建會**讓位**（exit 3）——專案自己那支才知道它的 release 慣例。
+
+> ⚠️ **前提是實作 commit 的 subject 要帶卡號。** 只讀 subject 是刻意的：讀 body 會把
+> commit 說明裡順帶提到的相關卡誤判成已完成。專案沒有這個慣例時本指令會回 0 筆並明說
+> ——那不是壞了，是慣例還沒建立，先去建立它。
 
 ---
 
@@ -225,8 +260,9 @@ node ${CLAUDE_PLUGIN_ROOT}/scripts/issue-new.mjs "<title>" \
 | 先看會建在哪 | `issue-new.mjs "<title>" --dry-run`（不消耗號碼） |
 | 改狀態 | 就地改 `index.md` 的 `status:`（完成補 `completed:`、更新 `updated:`；不搬檔） |
 | 看進行中 | `grep -rl 'status: <進行中值>' issues/` |
-| 搬群組 | `git mv issues/<old>/<ID>-<slug> issues/<new>/` + 改 frontmatter |
-| 狀態對帳 | 專案 reconcile 工具（先唯讀報告，再確認範圍後 `--fix`） |
+| 搬群組 | `git mv issues/<old>/<ID>-<slug> issues/<new>/` + 改 frontmatter（`issue-check.mjs` 會抓沒改的） |
+| 結構稽核 | `issue-check.mjs`（改完卡就跑；exit 1 = 有問題） |
+| 狀態對帳 | ① 專案 reconcile 工具 ② `issue-reconcile.mjs`（先唯讀報告，確認範圍後 `--fix`） |
 
 ## 權威來源
 

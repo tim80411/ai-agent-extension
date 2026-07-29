@@ -122,6 +122,8 @@ function normalizeProfile(name, p, path) {
   out.status = status;
   out.sections = p.sections ?? ['背景', 'AC', '範圍外'];
   out.createCmd = p.create_cmd ?? null; // 專案自帶工具時，skill 應優先用它
+  // 同 create_cmd 的讓位語意，但給對帳用：專案自己那支才知道它的 release 慣例
+  out.reconcileCmd = p.reconcile_cmd ?? null;
   out.frontmatterExtra = p.frontmatter_extra ?? {};
   out.recordBranch = p.record_branch ?? true;
   return out;

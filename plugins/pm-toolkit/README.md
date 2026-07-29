@@ -20,7 +20,9 @@
 |---|---|
 | [`scripts/pm-config.mjs`](scripts/pm-config.mjs) | 管理 `~/.config/pm-toolkit/config.yaml`：`init`／`list`／`show --json`／`detect --json`（唯讀推斷 repo 慣例）／`add --json`（附加寫入，保留註解） |
 | [`scripts/issue-new.mjs`](scripts/issue-new.mjs) | 通用防撞建單：發號＋建資料夾＋依 profile 產 frontmatter。專案自帶工具時讓位，未登記時導向 `init-tracker-config` |
-| [`scripts/smoke-test.sh`](scripts/smoke-test.sh) | 上述兩支的煙霧測試（48 項，含 8 路併發不撞號、推斷、登記端到端） |
+| [`scripts/issue-check.mjs`](scripts/issue-check.mjs) | 結構稽核：frontmatter 缺欄、status 不在 enum、grouping 欄與資料夾不符、`done`⇔`completed`、**關係欄單向**、INDEX 漏卡。exit 1 = 有問題 |
+| [`scripts/issue-reconcile.mjs`](scripts/issue-reconcile.mjs) | 狀態漂移對帳：卡沒標完成但實作 commit 已進 main／release。`--fix` 自動翻。專案自帶對帳工具時讓位 |
+| [`scripts/smoke-test.sh`](scripts/smoke-test.sh) | 上述四支的煙霧測試（71 項，含 8 路併發不撞號、推斷、登記端到端、每種結構漂移各一條） |
 | [`scripts/spec-frontmatter.sh`](scripts/spec-frontmatter.sh) | `spec-writing` 用 |
 
 設定檔 schema 見 [`skills/file-based-issues/references/config.md`](skills/file-based-issues/references/config.md)。
