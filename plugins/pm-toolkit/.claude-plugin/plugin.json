@@ -1,12 +1,12 @@
 {
   "name": "pm-toolkit",
-  "version": "0.2.0",
-  "description": "個人專案管理工具集：file-based-issues（檔案式／本地化 issue tracker 的建單、結構、修改、模板、狀態對帳方法論）＋ spec-writing（Spec/Story 撰寫方法論，含 INVEST 檢查與反模式掃描）",
+  "version": "0.3.0",
+  "description": "個人專案管理工具集：file-based-issues（檔案式／本地化 issue tracker 的建單、結構、修改、模板、狀態對帳方法論，內建零依賴防撞發號腳本與跨專案 profile 設定）＋ spec-writing（Spec/Story 撰寫方法論，含 INVEST 檢查與反模式掃描）",
   "author": {
     "name": "Timothy Liao",
     "email": "tim80411@gmail.com"
   },
   "repository": "https://github.com/tim80411/ai-agent-extension",
   "license": "MIT",
-  "keywords": ["project-management", "issue-tracker", "file-based", "spec", "user-story", "invest", "methodology", "建單", "需求單"]
+  "keywords": ["project-management", "issue-tracker", "file-based", "spec", "user-story", "invest", "methodology", "id-allocator", "建單", "需求單"]
 }

@@ -7,9 +7,14 @@ description: >-
   Covers the full lifecycle: 建單 with the project's collision-safe ID allocator
   (never hand-guess numbers), the issue-as-folder 結構 + frontmatter schema,
   in-place status 修改 / subtask nesting / milestone moves, the issue-body 模板,
-  and status-drift 對帳 against release tags. It is discover-then-apply: it
-  learns THIS repo's conventions (issues root, create-script, schema, reconcile
-  tool) then applies portable invariants. Use this whenever a repo keeps issues
+  and status-drift 對帳 against release tags. Ships a zero-dependency
+  collision-safe allocator (`issue-new.mjs`) for repos that have no create-script
+  of their own, driven by per-project profiles in a global config
+  (`~/.config/pm-toolkit/config.yaml`, managed via `pm-config.mjs`) that also
+  records which projects use jira/github instead so they get routed away.
+  It is config-first then discover-then-apply: it reads THIS repo's profile if
+  registered, otherwise learns its conventions (issues root, create-script,
+  schema, reconcile tool), then applies portable invariants. Use this whenever a repo keeps issues
   as local markdown files and the user mentions 開 issue / 建單 / 開需求單 / 新增
   issue / 開子單 / 加 subtask / 改 issue 狀態 / 標 Done / issue 歸 milestone /
   狀態漂移 / 對帳 issue / issue 格式 / 本地 issue / 檔案式 issue / local issue
@@ -28,8 +33,9 @@ description: >-
 > **核心價值不是重講機制，而是編碼「陷阱」**：用專案的發號工具、別手動猜號；改狀態就地改、別搬
 > 資料夾；完成的判定對得上 release。這些是每個檔案式 tracker 都會踩的雷，值得寫下來。
 
-這是 **discover-then-apply**：不同專案的 ID 格式、建立腳本、schema 都不同，所以本 skill 先
-**探出這個 repo 的慣例**（Step 0），再套用對所有檔案式 tracker 都成立的**不變量**。
+運作方式是 **config-first, then discover**：不同專案的 ID 格式、建立腳本、schema 都不同，所以
+先查全域設定檔有沒有這個專案的 profile（命中就直接拿設定），沒有才**探出這個 repo 的慣例**
+（Step 0），最後套用對所有檔案式 tracker 都成立的**不變量**。
 
 ## 什麼時候用（與不該用）
 
@@ -45,9 +51,24 @@ description: >-
 
 ---
 
-## Step 0 — 探出這個 repo 的慣例（一律先做）
+## Step 0a — 先問設定檔（最先做，一秒的事）
 
-因為是通用 skill，動手前先花 1 分鐘讀出這個專案的具體規則，別假設：
+```bash
+node ${CLAUDE_PLUGIN_ROOT}/scripts/pm-config.mjs show --json
+```
+
+它會依 cwd 解析出對應的 profile，直接吐出 `issues_root`／`id_prefix`／`grouping`／`status`／
+`sections`／`create_cmd`。**命中就跳過 Step 0b 的探勘**——設定檔就是已經探過的結果。
+
+- 退出碼非 0 或說「找不到對應的 profile」→ 這個專案還沒登記，往下走 Step 0b 探勘，
+  探完**主動提議把結果寫進設定檔**，下次就不用再探。
+- `handled_by_this_plugin: false` → 這個專案根本不是檔案式 tracker（見下方「跨 provider 路由」）。
+- 沒有設定檔 → `pm-config.mjs init` 產範本。schema 見
+  [`references/config.md`](references/config.md)。
+
+## Step 0b — 探出這個 repo 的慣例（設定檔沒命中才做）
+
+動手前先花 1 分鐘讀出這個專案的具體規則，別假設：
 
 1. **issues 根目錄**：通常 `issues/`；找找有無 `issues/README.md`（多半就是格式權威）與 `INDEX.md`（導覽）。
 2. **建立工具**：`package.json` 的 `scripts` 裡找 `issue:new` 之類；或 `scripts/`、`bin/`、`.tools/`。
@@ -64,12 +85,29 @@ description: >-
 
 ---
 
+## 跨 provider 路由
+
+設定檔的 profile 有 `provider` 欄位，因為同一個人手上不會只有檔案式 tracker。本 skill
+**只處理 `file-based`**；其餘只做辨識與轉介，不要硬套：
+
+| `provider` | 本 skill | 該用什麼 |
+|---|---|---|
+| `file-based` | ✅ 全程處理 | 就是這份文件 |
+| `jira` | ❌ 轉介 | `jira-cli` skill（或 Atlassian MCP） |
+| `github` | ❌ 轉介 | `gh issue` / GitHub MCP |
+| `linear` | ❌ 轉介 | Linear 自己的工具 |
+
+`issue-new.mjs` 遇到非 file-based 的 profile 會**以 exit code 2 拒絕執行**並印出該用的工具——
+這是刻意的閘門，避免在 Jira 專案的 repo 裡莫名其妙長出一個 `issues/` 資料夾。
+
+---
+
 ## 通用不變量（所有檔案式 tracker 都成立）
 
 這些是本 skill 最該記住的「別做」清單：
 
-1. **用專案的發號工具，別手動猜號。** 好的實作會跨 worktree 原子防撞發號；手動 `find` 最大號 +1
-   在多 worktree/多人並行時**必撞**。工具壞了才退回 fallback（見下）。
+1. **絕不手動猜號。** 手動 `find` 最大號 +1 在多 worktree／多人並行時**必撞**，而且撞號後
+   ID 已散進 commit 與 branch，收拾成本極高。依序找一個會原子發號的工具用（見「建單」的三階順序）。
 2. **ID 是不可變主鍵。** 它散落於 commit／branch／docs，改名＝斷連結。slug 可有損、可改，ID 不可。
 3. **改狀態就地改，別搬資料夾。** issue = 資料夾＝穩定路徑；狀態只是 frontmatter 一行。搬檔會斷附件與連結。
 4. **frontmatter 欄位補齊。** 缺欄位讓 grep/工具失準。用工具產骨架就有齊全欄位；手改別漏 `updated:`。
@@ -82,14 +120,34 @@ description: >-
 
 **Goal**：在對的位置、用防撞號建骨架，再填內容。
 
-**Actions**：
-1. 用專案的建立工具（探出的那支）。典型介面：
-   `<tool> "<title>" [--<grouping> <m>] [--parent <ID>] [--label <l> ...]`
-   （grouping 常叫 milestone/epic；parent 表示建成巢狀子單、群組多半繼承父的）。
-2. title 建議帶類型前綴（`[Bug]`／`[Enabler]`／`[Epic]` 等，若專案有此慣例）；slug 通常會自動去前綴。
-3. 工具會印出新 ID 與 `index.md` 路徑 → **打開它填內容**（見「模板」）。**別自己 mkdir 建資料夾。**
-4. **Fallback（僅當工具真的不可用）**：掃現有最大號（如 `find issues -type d -name '<PREFIX>-*'`），
-   交叉查遠端（`git ls-remote origin`）確認沒撞，手動建並照 schema 補齊 frontmatter。
+**發號的三階順序**——由上而下，能用上一階就別用下一階：
+
+**① 專案自帶的建立工具**（`create_cmd`，或 Step 0b 探到的那支）。它才是該專案的權威，
+發號規則、schema、副作用都可能跟通用版不同。典型介面：
+`<tool> "<title>" [--<grouping> <m>] [--parent <ID>] [--label <l> ...]`
+
+**② 本 plugin 內建的通用發號**（專案沒有自己的工具時）：
+
+```bash
+node ${CLAUDE_PLUGIN_ROOT}/scripts/issue-new.mjs "<title>" \
+     [--group <g>] [--parent <ID>] [--label <l>]... [--dry-run] [--json]
+```
+
+依 profile 發號 + 建資料夾 + 產 frontmatter 骨架，印出 ID 與 `index.md` 路徑。防撞靠兩層：
+`mkdir` 原子鎖 + `next = max(計數檔, 掃描最大號) + 1`——所以計數檔被砍、換機器、多 worktree
+都不會退號重發。計數檔在 `~/.config/pm-toolkit/counters/<profile>.counter`（不在 `.git` 裡，
+沒有 git 的專案照樣能用）。
+若 profile 設了 `create_cmd`，它會**以 exit code 3 讓位**並印出該跑的指令；真要覆寫才加 `--force`。
+
+**③ 手動建**——只在前兩階都不可用時。掃現有最大號（`find issues -type d -name '<PREFIX>-*'`）、
+交叉查 `git ls-remote origin` 確認沒撞，再照 schema 補齊 frontmatter。
+**這一階本質不安全**（掃描與建立之間有空窗），做完要立刻 commit 縮小撞號視窗，
+並考慮把這個專案登記進設定檔，下次就能走 ②。
+
+**其餘要點**：
+- title 建議帶類型前綴（`[Bug]`／`[Enabler]`／`[Epic]` 等，若專案有此慣例）；slug 會自動去前綴。
+- 拿到路徑後 **打開 `index.md` 填內容**（見「模板」）。**別自己 mkdir 建資料夾。**
+- 不確定會建在哪，先 `--dry-run` 看一眼——它不會消耗號碼。
 
 ## 結構（structure）
 
@@ -147,8 +205,12 @@ description: >-
 
 | 想做 | 做法 |
 |---|---|
-| 新增 issue | 專案建立工具 `"<title>" [--<grouping> <m>]`（別手動猜號） |
-| 新增子單 | 建立工具 `"<title>" --parent <ID>` |
+| 看這個專案的慣例 | `node ${CLAUDE_PLUGIN_ROOT}/scripts/pm-config.mjs show --json` |
+| 列出所有登記的專案 | `pm-config.mjs list`（含各自的 provider） |
+| 產設定檔範本 | `pm-config.mjs init` → `~/.config/pm-toolkit/config.yaml` |
+| 新增 issue | ① 專案建立工具 ② `issue-new.mjs "<title>" [--group <g>]` ③ 手動（別手動猜號） |
+| 新增子單 | 同上加 `--parent <ID>` |
+| 先看會建在哪 | `issue-new.mjs "<title>" --dry-run`（不消耗號碼） |
 | 改狀態 | 就地改 `index.md` 的 `status:`（完成補 `completed:`、更新 `updated:`；不搬檔） |
 | 看進行中 | `grep -rl 'status: <進行中值>' issues/` |
 | 搬群組 | `git mv issues/<old>/<ID>-<slug> issues/<new>/` + 改 frontmatter |
@@ -156,5 +218,10 @@ description: >-
 
 ## 權威來源
 
-疑問一律先查該 repo 的 `issues/README.md`（格式）、`INDEX.md`（導覽）、`CLAUDE.md`（開發規則），
-不要憑記憶。本 skill 是通則，三者衝突時**以 repo 內檔案為準**。
+由高到低：
+
+1. **該 repo 內的檔案**——`issues/README.md`（格式）、`INDEX.md`（導覽）、`CLAUDE.md`（開發規則）、
+   專案自帶的建立／對帳腳本。疑問一律先查這裡，不要憑記憶。
+2. **設定檔的 profile**（`~/.config/pm-toolkit/config.yaml`）——它是「已經探過一次的結果」的快取，
+   不是規則的來源。跟 repo 內檔案對不上時**以 repo 為準**，並順手把 profile 改正。
+3. **本 skill**——只是通則，最先被推翻的一層。
