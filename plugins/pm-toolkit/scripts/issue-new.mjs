@@ -105,16 +105,23 @@ async function main() {
     group = profile.grouping ? relative(issuesRoot, dir).split(/[\\/]/)[0] : null;
   } else if (profile.grouping) {
     targetParent = join(issuesRoot, group);
-    if (profile.requireExistingGroup && !(await exists(targetParent))) {
+    if (!(await exists(targetParent))) {
       let avail = [];
       try {
         avail = (await readdir(issuesRoot, { withFileTypes: true })).filter((e) => e.isDirectory()).map((e) => e.name);
       } catch {
         // issuesRoot 還不存在
       }
-      throw new ConfigError(
-        `分組目錄不存在：${targetParent}\n可用的 ${profile.grouping}：${avail.join(', ') || '(無)'}\n` +
-          `（要自動建請在 profile 設 require_existing_group: false）`,
+      if (profile.requireExistingGroup) {
+        throw new ConfigError(
+          `分組目錄不存在：${targetParent}\n可用的 ${profile.grouping}：${avail.join(', ') || '(無)'}\n` +
+            `（要自動建請把 profile 的 require_existing_group 拿掉或設 false）`,
+        );
+      }
+      // 自動建，但把既有的兄弟目錄印出來——打錯名字時一眼看得到
+      process.stderr.write(
+        `＋ 自動建立 ${profile.grouping} 目錄：${relative(base, targetParent)}\n` +
+          (avail.length ? `  （既有的：${avail.join(', ')}——若是打錯字請刪掉新目錄重來）\n` : ''),
       );
     }
   } else {
@@ -161,7 +168,12 @@ async function main() {
   }
 }
 
+// 退出碼是給呼叫端分流用的：
+//   2 = provider 不是 file-based，轉介別的工具
+//   3 = 專案自帶建立工具，該用那支
+//   4 = 這台機器／這個專案還沒登記，去跑 init-tracker-config skill
+//   1 = 其他錯誤
 main().catch((e) => {
   process.stderr.write(`${e instanceof ConfigError ? e.message : (e.stack ?? e.message)}\n`);
-  process.exit(1);
+  process.exit(e?.needsSetup ? 4 : 1);
 });

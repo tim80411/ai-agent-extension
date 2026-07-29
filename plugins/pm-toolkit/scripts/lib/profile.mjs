@@ -99,9 +99,14 @@ export async function resolveProfile(config, { cwd = process.cwd(), explicit = n
     return pick(dirName, `目錄名 \`${dirName}\` 與 profile 同名`);
   }
 
-  throw new ConfigError(
+  const err = new ConfigError(
     `在 ${here} 找不到對應的 profile。\n` +
-      `可用 profile：${names.join(', ') || '(無)'}\n` +
-      `解法：加 --profile <name>、在專案根放 .pm-toolkit-profile，或在 config 幫該 profile 補 match.git_remote / match.path。`,
+      `已登記的：${names.join(', ') || '(無)'}\n` +
+      `這個專案還沒登記——用 \`init-tracker-config\` skill 走一次引導式登記（它會掃 repo 推斷慣例、` +
+      `跟你確認 ID 前綴，再寫進設定檔）。\n` +
+      `已經登記過只是認不出來的話：加 --profile <name>、在專案根放 .pm-toolkit-profile，` +
+      `或補該 profile 的 match.git_remote / match.path。`,
   );
+  err.needsSetup = true;
+  throw err;
 }

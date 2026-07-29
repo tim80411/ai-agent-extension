@@ -6,7 +6,8 @@
 
 import { writeFile, mkdir, access } from 'node:fs/promises';
 import { loadConfig, configPath, counterPathFor, PROVIDERS, ConfigError } from './lib/config.mjs';
-import { resolveProfile } from './lib/profile.mjs';
+import { resolveProfile, repoRoot } from './lib/profile.mjs';
+import { inferTracker, appendProfile, renderProfileBlock, NeedPrefixError } from './lib/autoinit.mjs';
 import { dirname } from 'node:path';
 
 const TEMPLATE = `# pm-toolkit 設定檔
@@ -126,18 +127,78 @@ async function cmdShow(json, explicit) {
   }
 }
 
+// detect：唯讀。掃 repo 把慣例推斷出來給人看／給 skill 讀，**不寫任何檔案**。
+async function cmdDetect(json, idPrefix) {
+  const base = (await repoRoot(process.cwd())) ?? process.cwd();
+  let inf;
+  try {
+    inf = await inferTracker(base, { idPrefix });
+  } catch (e) {
+    if (e instanceof NeedPrefixError) {
+      if (json) {
+        process.stdout.write(`${JSON.stringify({ ok: false, need: 'id_prefix', base, ...e.detail }, null, 2)}\n`);
+        process.exit(4);
+      }
+      process.stderr.write(`${e.message}\n`);
+      process.exit(4);
+    }
+    throw e;
+  }
+  if (json) return void process.stdout.write(`${JSON.stringify({ ok: true, base, ...inf }, null, 2)}\n`);
+  process.stdout.write(`掃描：${base}\n找到 ${inf.evidence.issuesFound} 個現存 issue 資料夾\n\n`);
+  process.stdout.write(`${renderProfileBlock(inf)}\n\n`);
+  process.stdout.write(`以上尚未寫入。確認後用 \`pm-config.mjs add --json '<json>'\` 登記。\n`);
+}
+
+// add：把（已經跟人確認過的）profile 寫進設定檔。附加而非重寫，保留既有註解。
+async function cmdAdd(payload) {
+  if (!payload) throw new ConfigError(`add 需要 --json '<profile json>'（可先跑 detect --json 取得草稿）`);
+  let inf;
+  try {
+    inf = JSON.parse(payload);
+  } catch (e) {
+    throw new ConfigError(`--json 不是合法 JSON：${e.message}`);
+  }
+  if (!inf.profileName) throw new ConfigError('缺 profileName');
+  const provider = inf.provider ?? 'file-based';
+  if (!PROVIDERS[provider]) throw new ConfigError(`provider \`${provider}\` 不認得`);
+  if (provider === 'file-based' && !inf.idPrefix) throw new ConfigError('file-based profile 缺 idPrefix');
+
+  const existing = await loadConfig().catch(() => null);
+  if (existing?.profiles?.[inf.profileName]) {
+    throw new ConfigError(`profile \`${inf.profileName}\` 已存在於 ${existing.path}；要改請直接編輯該檔`);
+  }
+
+  const path = await appendProfile({
+    provider,
+    match: inf.match ?? {},
+    status: inf.status ?? { initial: 'Backlog', done: 'Done', enum: ['Backlog', 'Todo', 'In Progress', 'Done'] },
+    sections: inf.sections ?? ['背景', 'AC', '範圍外'],
+    ...inf,
+  });
+
+  // 寫完立刻讀回驗證，別讓壞掉的 config 留在磁碟上
+  const after = await loadConfig();
+  if (!after.profiles[inf.profileName]) throw new ConfigError(`寫入後讀不到 profile \`${inf.profileName}\`，請檢查 ${path}`);
+  process.stdout.write(`已登記 profile \`${inf.profileName}\` → ${path}\n`);
+}
+
 async function main() {
   const argv = process.argv.slice(2);
   const cmd = argv[0] ?? 'show';
   const json = argv.includes('--json');
   const force = argv.includes('--force');
-  const pIdx = argv.indexOf('--profile');
-  const explicit = pIdx >= 0 ? argv[pIdx + 1] : null;
+  const flag = (name) => {
+    const i = argv.indexOf(name);
+    return i >= 0 ? argv[i + 1] : null;
+  };
 
   if (cmd === 'init') return cmdInit(force);
   if (cmd === 'list') return cmdList(json);
-  if (cmd === 'show') return cmdShow(json, explicit);
-  throw new ConfigError(`不認得的指令：${cmd}（可用：init / show / list）`);
+  if (cmd === 'show') return cmdShow(json, flag('--profile'));
+  if (cmd === 'detect') return cmdDetect(json, flag('--id-prefix'));
+  if (cmd === 'add') return cmdAdd(flag('--json'));
+  throw new ConfigError(`不認得的指令：${cmd}（可用：init / show / list / detect / add）`);
 }
 
 main().catch((e) => {

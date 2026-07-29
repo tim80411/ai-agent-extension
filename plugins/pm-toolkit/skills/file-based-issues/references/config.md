@@ -9,10 +9,16 @@
 刻意不放 `~/.claude/`——那是 Claude Code 管理的目錄，會被安裝／更新流程動到；使用者自己的
 設定不該跟工具的安裝狀態綁在一起。
 
+**要登記一個新專案，別手寫這份檔案**——走
+[`init-tracker-config`](../../init-tracker-config/SKILL.md) skill，它會掃 repo 推斷、跟你確認、寫入、驗證。
+底下的指令是那個 skill 在用的零件：
+
 ```bash
-node ${CLAUDE_PLUGIN_ROOT}/scripts/pm-config.mjs init          # 產範本
-node ${CLAUDE_PLUGIN_ROOT}/scripts/pm-config.mjs list          # 列出所有 profile
-node ${CLAUDE_PLUGIN_ROOT}/scripts/pm-config.mjs show --json   # 解析當下 cwd 對應哪個
+node ${CLAUDE_PLUGIN_ROOT}/scripts/pm-config.mjs init            # 產範本（手動起頭用）
+node ${CLAUDE_PLUGIN_ROOT}/scripts/pm-config.mjs list            # 列出所有 profile
+node ${CLAUDE_PLUGIN_ROOT}/scripts/pm-config.mjs show --json     # 解析當下 cwd 對應哪個
+node ${CLAUDE_PLUGIN_ROOT}/scripts/pm-config.mjs detect --json   # 唯讀推斷這個 repo 的慣例，不寫檔
+node ${CLAUDE_PLUGIN_ROOT}/scripts/pm-config.mjs add --json '…'  # 附加寫入一個 profile（保留既有註解）
 ```
 
 ---
@@ -45,7 +51,8 @@ profiles:
 | 5 | `match.path` | 對 cwd 做前綴比對，支援 `~` |
 | 6 | profile 名 == repo 目錄名 | — |
 
-全部落空 → **報錯，不猜**。猜錯專案去發號會把號碼寫進別人的序列，比停下來貴得多。
+全部落空 → **以 exit 4 停下，不猜**，並指向 `init-tracker-config` skill。猜錯專案去發號會把號碼
+寫進別人的序列，比停下來貴得多。
 
 `match.git_remote` 只做子字串比對，所以填 `owner/repo` 就能同時吃 `git@github.com:owner/repo.git`
 與 `https://github.com/owner/repo.git` 兩種形式。
@@ -58,7 +65,7 @@ profiles:
 | `id_prefix` | **必填** | ID 主鍵前綴，`TIM` → `TIM-1`。只能英數與底線、開頭為字母 |
 | `grouping` | `null` | layer-1 資料夾的語意（`milestone`／`epic`…）。同時是 frontmatter 的欄位名。`null` = 不分組 |
 | `default_group` | `uncategorized`（有 grouping 時） | 沒給 `--group` 時落腳處 |
-| `require_existing_group` | `true` | `true` = 分組目錄不存在就報錯並列出可用值；`false` = 自動建 |
+| `require_existing_group` | `false` | `false` = 分組目錄不存在就自動建（並印出既有兄弟目錄）；`true` = 擋下並列出可用值 |
 | `status.initial` | `Backlog` | 新單的 status |
 | `status.done` | `Done` | 完成值（對帳與 `completed:` 用） |
 | `status.enum` | `[Backlog, Todo, In Progress, Done]` | 合法值；`initial`／`done` 不在裡面會直接擋下 |

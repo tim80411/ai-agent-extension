@@ -47,6 +47,12 @@ profiles:
     id_prefix: HT
     grouping: null
     create_cmd: "pnpm issue:new"
+  strict:
+    match:
+      path: __WORK__/strict
+    id_prefix: ST
+    grouping: milestone
+    require_existing_group: true
   jirathing:
     provider: jira
     match:
@@ -90,8 +96,14 @@ OUT=$(cd "$WORK/demo" && $NEW "第二張" --group m1 2>&1)
 [[ "$(head -1 <<<"$OUT")" == "DEMO-2" ]] && ok "連號 DEMO-2" || bad "連號" "$OUT"
 [[ "$(sed -n 2p <<<"$OUT")" == *"/issues/m1/DEMO-2-"* ]] && ok "落在指定分組 m1" || bad "分組落地" "$OUT"
 
-OUT=$(cd "$WORK/demo" && $NEW "不存在的分組" --group nope 2>&1)
-grep -q '分組目錄不存在' <<<"$OUT" && ok "分組不存在時擋下並列出可用值" || bad "分組檢查" "$OUT"
+OUT=$(cd "$WORK/demo" && $NEW "不存在的分組" --group m9 2>&1)
+grep -q '自動建立 milestone 目錄' <<<"$OUT" && ok "分組不存在時自動建立" || bad "自動建分組" "$OUT"
+grep -q '既有的：' <<<"$OUT" && ok "同時印出既有兄弟目錄（打錯字看得出來）" || bad "兄弟目錄提示" "$OUT"
+[[ -d "$WORK/demo/issues/m9" ]] && ok "目錄真的建出來了" || bad "目錄未建" "$WORK/demo/issues/m9"
+
+mkdir -p "$WORK/strict/issues"
+OUT=$(cd "$WORK/strict" && $NEW "嚴格模式" --group nope 2>&1)
+grep -q '分組目錄不存在' <<<"$OUT" && ok "require_existing_group: true 仍可擋下" || bad "嚴格模式" "$OUT"
 
 head_ "子單巢狀"
 OUT=$(cd "$WORK/demo" && $NEW "子任務" --parent DEMO-2 2>&1)
@@ -138,10 +150,55 @@ OUT=$(cd "$WORK/hastool" && $NEW "應該讓位" 2>&1); RC=$?
 OUT=$(cd "$WORK/hastool" && $NEW "強制建" --force 2>&1)
 [[ "$(head -1 <<<"$OUT")" == "HT-1" ]] && ok "--force 可覆寫讓位" || bad "--force" "$OUT"
 
-head_ "找不到 profile 時不亂猜"
+head_ "找不到 profile 時導向登記 skill"
 mkdir -p "$WORK/unknown"
 OUT=$(cd "$WORK/unknown" && $NEW "沒設定過的專案" 2>&1); RC=$?
-[[ $RC -ne 0 ]] && grep -q '找不到對應的 profile' <<<"$OUT" && ok "未知專案直接報錯而非猜一個來發號" || bad "未知專案" "rc=$RC $OUT"
+[[ $RC -eq 4 ]] && ok "未登記專案以 exit 4 停下（不猜一個來發號）" || bad "未知專案退出碼" "rc=$RC $OUT"
+grep -q 'init-tracker-config' <<<"$OUT" && ok "訊息指向 init-tracker-config skill" || bad "缺少 skill 指引" "$OUT"
+
+head_ "detect：唯讀推斷"
+OUT=$(cd "$WORK/demo" && $CFG detect --json 2>&1)
+grep -q '"idPrefix": "DEMO"' <<<"$OUT" && ok "從現存資料夾推斷出 id_prefix=DEMO" || bad "推斷 prefix" "$OUT"
+grep -q '"issuesRoot": "issues"' <<<"$OUT" && ok "推斷出 issues_root" || bad "推斷 issuesRoot" "$OUT"
+grep -q '"grouping": "milestone"' <<<"$OUT" && ok "靠 frontmatter 值對上目錄名推斷出 grouping" || bad "推斷 grouping" "$OUT"
+grep -q '"範圍外"' <<<"$OUT" && ok "從現存 index.md 抽出內文分段" || bad "推斷 sections" "$OUT"
+grep -q '"Backlog"' <<<"$OUT" && ok "從現存 index.md 統計出 status 值" || bad "推斷 status" "$OUT"
+
+OUT=$(cd "$WORK/unknown" && $CFG detect --json 2>&1); RC=$?
+[[ $RC -eq 4 ]] && grep -q '"need": "id_prefix"' <<<"$OUT" && ok "沒有任何現存 issue 時拒絕猜前綴（exit 4）" || bad "空 repo 推斷" "rc=$RC $OUT"
+
+head_ "detect 認出專案自帶的建立工具"
+mkdir -p "$WORK/withtool/issues/uncategorized/WT-1-x"
+printf -- '---\nid: WT-1\nstatus: Todo\nmilestone: uncategorized\n---\n\n## 背景\n' > "$WORK/withtool/issues/uncategorized/WT-1-x/index.md"
+printf '{"scripts":{"issue:new":"ts-node x.ts"}}' > "$WORK/withtool/package.json"
+touch "$WORK/withtool/pnpm-lock.yaml"
+OUT=$(cd "$WORK/withtool" && $CFG detect --json 2>&1)
+grep -q '"createCmd": "pnpm issue:new"' <<<"$OUT" && ok "認出 package.json 的 issue:new 並用對 runner" || bad "createCmd 偵測" "$OUT"
+
+head_ "add：登記後端到端可建單"
+mkdir -p "$WORK/newproj/issues/m1/NP-1-seed"
+printf -- '---\nid: NP-1\nstatus: Todo\nmilestone: m1\n---\n\n## 背景\n\n## AC\n' > "$WORK/newproj/issues/m1/NP-1-seed/index.md"
+DETECTED=$(cd "$WORK/newproj" && $CFG detect --json 2>/dev/null)
+OUT=$(cd "$WORK/newproj" && $CFG add --json "$DETECTED" 2>&1)
+grep -q '已登記 profile `newproj`' <<<"$OUT" && ok "add 寫入並讀回驗證通過" || bad "add 寫入" "$OUT"
+OUT=$(cd "$WORK/newproj" && $CFG show --json 2>&1)
+grep -q '"profile": "newproj"' <<<"$OUT" && ok "show 解析得到新登記的 profile" || bad "登記後解析" "$OUT"
+OUT=$(cd "$WORK/newproj" && $NEW "登記後第一張" --group m1 2>&1)
+[[ "$(head -1 <<<"$OUT")" == "NP-2" ]] && ok "接續現存最大號發 NP-2" || bad "登記後建單" "$OUT"
+OUT=$(cd "$WORK/newproj" && $CFG add --json "$DETECTED" 2>&1)
+grep -q '已存在' <<<"$OUT" && ok "重複登記同名 profile 被擋下" || bad "重複登記" "$OUT"
+
+head_ "add：非 file-based 的轉介型 profile"
+OUT=$($CFG add --json '{"profileName":"somejira","provider":"jira","match":{"path":"'"$WORK"'/somejira"},"settings":{"project_key":"ABC"}}' 2>&1)
+grep -q '已登記' <<<"$OUT" && ok "jira 型 profile 可登記" || bad "jira profile 登記" "$OUT"
+mkdir -p "$WORK/somejira"
+OUT=$(cd "$WORK/somejira" && $NEW "應該被擋" 2>&1); RC=$?
+[[ $RC -eq 2 ]] && ok "登記後該 repo 建單被擋（exit 2，不會長出 issues/）" || bad "jira 閘門" "rc=$RC $OUT"
+[[ ! -d "$WORK/somejira/issues" ]] && ok "確認沒有誤建 issues/ 目錄" || bad "誤建 issues/" ""
+
+head_ "設定檔既有內容不被洗掉"
+grep -q '^# pm-toolkit 設定檔' "$PM_TOOLKIT_CONFIG" 2>/dev/null || head -1 "$PM_TOOLKIT_CONFIG" | grep -q 'version' && ok "append 寫入後原檔頭仍在" || bad "設定檔被重寫" "$(head -3 "$PM_TOOLKIT_CONFIG")"
+grep -q 'id_prefix: DEMO' "$PM_TOOLKIT_CONFIG" && ok "既有 profile 未被破壞" || bad "既有 profile 遺失" ""
 
 head_ "YAML parser 拒絕不支援語法"
 printf 'profiles:\n\tdemo:\n\t\tid_prefix: X\n' > "$WORK/bad.yaml"

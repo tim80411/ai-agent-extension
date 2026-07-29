@@ -60,11 +60,12 @@ node ${CLAUDE_PLUGIN_ROOT}/scripts/pm-config.mjs show --json
 它會依 cwd 解析出對應的 profile，直接吐出 `issues_root`／`id_prefix`／`grouping`／`status`／
 `sections`／`create_cmd`。**命中就跳過 Step 0b 的探勘**——設定檔就是已經探過的結果。
 
-- 退出碼非 0 或說「找不到對應的 profile」→ 這個專案還沒登記，往下走 Step 0b 探勘，
-  探完**主動提議把結果寫進設定檔**，下次就不用再探。
+- **exit 4**（「找不到對應的 profile」或「找不到設定檔」）→ 這個專案還沒登記。
+  **改用 [`init-tracker-config`](../init-tracker-config/SKILL.md) skill 走一次引導式登記**：
+  它會掃 repo 推斷慣例、跟使用者確認 ID 前綴（不可變主鍵，不猜）、寫進設定檔並驗證。
+  登記完再回來建單。使用者不想登記才退回 Step 0b 人工探勘。
 - `handled_by_this_plugin: false` → 這個專案根本不是檔案式 tracker（見下方「跨 provider 路由」）。
-- 沒有設定檔 → `pm-config.mjs init` 產範本。schema 見
-  [`references/config.md`](references/config.md)。
+- schema 見 [`references/config.md`](references/config.md)。
 
 ## Step 0b — 探出這個 repo 的慣例（設定檔沒命中才做）
 
@@ -137,7 +138,18 @@ node ${CLAUDE_PLUGIN_ROOT}/scripts/issue-new.mjs "<title>" \
 `mkdir` 原子鎖 + `next = max(計數檔, 掃描最大號) + 1`——所以計數檔被砍、換機器、多 worktree
 都不會退號重發。計數檔在 `~/.config/pm-toolkit/counters/<profile>.counter`（不在 `.git` 裡，
 沒有 git 的專案照樣能用）。
-若 profile 設了 `create_cmd`，它會**以 exit code 3 讓位**並印出該跑的指令；真要覆寫才加 `--force`。
+**退出碼分流**——別只看訊息，看碼決定下一步：
+
+| 碼 | 意思 | 下一步 |
+|---|---|---|
+| 0 | 建好了 | 打開印出的 `index.md` 填內容 |
+| 2 | profile 的 provider 不是 file-based | 轉介到對應工具（見「跨 provider 路由」） |
+| 3 | 專案自帶 `create_cmd` | 改跑它印出來的那支指令；真要覆寫才加 `--force` |
+| 4 | 這個專案還沒登記 | 走 [`init-tracker-config`](../init-tracker-config/SKILL.md) skill |
+
+`issues_root` 與分組目錄**不存在會自動建**，並把既有的兄弟目錄一起印出來——`--group` 打錯字時
+一眼就看得到（例如既有 `m2-goal-discovery` 卻打成 `m2`）。要換回「打錯就擋下」的嚴格模式，
+在 profile 設 `require_existing_group: true`。
 
 **③ 手動建**——只在前兩階都不可用時。掃現有最大號（`find issues -type d -name '<PREFIX>-*'`）、
 交叉查 `git ls-remote origin` 確認沒撞，再照 schema 補齊 frontmatter。

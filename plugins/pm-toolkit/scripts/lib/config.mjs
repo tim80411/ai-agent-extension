@@ -46,10 +46,12 @@ export async function loadConfig() {
     raw = await readFile(path, 'utf8');
   } catch (e) {
     if (e.code === 'ENOENT') {
-      throw new ConfigError(
+      const err = new ConfigError(
         `找不到設定檔：${path}\n` +
-          `跑 \`node <plugin>/scripts/pm-config.mjs init\` 產一份範本，或設 $PM_TOOLKIT_CONFIG 指向現有的。`,
+          `這台機器還沒設定過 pm-toolkit——用 \`init-tracker-config\` skill 走一次引導式登記。`,
       );
+      err.needsSetup = true;
+      throw err;
     }
     throw e;
   }
@@ -115,7 +117,8 @@ function normalizeProfile(name, p, path) {
   out.idPrefix = String(p.id_prefix);
   out.grouping = p.grouping ?? null; // 例如 milestone / epic；null = 不分組
   out.defaultGroup = p.default_group ?? (out.grouping ? 'uncategorized' : null);
-  out.requireExistingGroup = p.require_existing_group ?? true;
+  // 預設自動建分組目錄。設 true 可換回「打錯名字就擋下」的嚴格模式。
+  out.requireExistingGroup = p.require_existing_group ?? false;
   out.status = status;
   out.sections = p.sections ?? ['背景', 'AC', '範圍外'];
   out.createCmd = p.create_cmd ?? null; // 專案自帶工具時，skill 應優先用它
