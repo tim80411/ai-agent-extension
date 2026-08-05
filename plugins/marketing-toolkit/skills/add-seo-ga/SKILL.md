@@ -1,7 +1,7 @@
 ---
 name: add-seo-ga
-description: This skill should be used when the user asks to "加入 SEO", "加 meta tags", "加 og tags", "加 Open Graph", "加 Google Analytics", "GA 追蹤", "GA ID", "gtag", "SEO 標籤", "社群分享標籤", or asks to add SEO metadata, Open Graph tags, or Google Analytics tracking code to HTML files.
-version: 1.0.0
+description: 在**單一 HTML 檔**的 `<head>` 快速插入 SEO meta／Open Graph 標籤與 Google Analytics 追蹤碼。適用於資訊已知、只差把標籤貼進去的情況。當使用者說「加入 SEO」「加 meta tags」「加 og tags」「加 Open Graph」「加 Google Analytics」「GA 追蹤」「GA ID」「gtag」「SEO 標籤」「社群分享標籤」時使用。**邊界**：若是整個站要交付、需要 canonical／robots.txt／sitemap.xml／JSON-LD 結構化資料／多頁處理／交付前稽核，改用 `site-seo`——那支才處理「預覽站的 noindex robots.txt 不能被交付出去」這類會讓客戶整站搜不到的關卡。
+version: 1.1.0
 ---
 
 # add-seo-ga
@@ -22,8 +22,12 @@ version: 1.0.0
 7. **作者名稱** - 內容作者或機構名稱
 8. **版權所有者** - 版權歸屬者名稱
 9. **網站名稱** - 網站品牌名稱
-10. **預覽圖寬度** - 圖片寬度（像素，預設 300）
-11. **預覽圖高度** - 圖片高度（像素，預設 300）
+10. **預覽圖寬度** - 圖片寬度（像素，預設 **1200**）
+11. **預覽圖高度** - 圖片高度（像素，預設 **630**）
+
+> **尺寸預設值已從 300×300 改為 1200×630（2026-08-05）。** Facebook／LINE／X 的大圖卡
+> 以 1.91:1 為準，低於 600×315 會退化成小圖卡甚至不顯示。300×300 是舊建議，
+> 照著填會讓分享效果比不填還差。實際尺寸要以圖檔真實尺寸為準，別填一個和圖不符的數字。
 
 ### Google Analytics 資訊（2項，可選）
 12. **GA 追蹤 ID** - Google Analytics 追蹤代碼 ID（例如：G-XXXXXXXXXX）
@@ -43,6 +47,10 @@ version: 1.0.0
 <meta name="description" content="{分享描述文}">
 ```
 
+> **`keywords` 對 Google 沒有作用**——2009 年就公開宣布不採用。保留是因為部分客戶
+> 會逐項檢查、部分內部系統仍在讀它。放著無害，但**不要拿它當「已做 SEO」的交付證據**，
+> 真正有影響的是 `title` 與 `description`。
+
 #### 2. Open Graph 標籤（基本）
 ```html
 <meta property="og:title" content="{分享預覽標題}" />
@@ -60,14 +68,18 @@ version: 1.0.0
 <meta name="copyright" content="{版權所有者}">
 ```
 
-#### 4. Google Plus / Schema.org 標籤
+#### 4. X / Twitter 卡片
 ```html
-<link rel="author" href="{作者名稱}">
-<link rel="publisher" href="{作者名稱}">
-<meta itemprop="name" content="{分享預覽標題}">
-<meta itemprop="image" content="{預覽圖網址}">
-<meta itemprop="description" content="{分享描述文}">
+<meta name="twitter:card" content="summary_large_image">
 ```
+
+只需要這一行。X 找不到 `twitter:*` 時會自動退回讀 `og:*`，標題／描述／圖片都不必重寫；
+`twitter:card` 沒有 OG 對應欄位，所以必須明寫，它決定卡片是大圖還是小圖。
+
+> **已移除的標籤（2026-08-05）**：本節原本教人加 `<link rel="author">` 與
+> `<link rel="publisher">`。那是 Google+ 時代的 authorship markup，隨 Google+ 於 2019 年
+> 一併停用，現在只是無效字元。原本的 `itemprop` microdata 也移除了——同樣的資訊用
+> JSON-LD 表達更穩且是 Google 明示偏好的格式，需要結構化資料請用 `site-seo`。
 
 #### 5. Open Graph 圖片詳細資訊
 ```html
@@ -82,7 +94,7 @@ version: 1.0.0
 GA 代碼應加在 `</head>` 標籤之前，在所有其他 `<script>` 標籤之後。
 
 #### 方式 1：使用 GA 追蹤 ID（推薦）
-如果使用者提供 GA ID（例如：G-1WBLRTAAAA），使用以下格式：
+如果使用者提供 GA ID（例如：`G-ABCD123456`），使用以下格式：
 
 ```html
 <!-- write your code here -->
@@ -163,7 +175,7 @@ GA 代碼應加在 `</head>` 標籤之前，在所有其他 `<script>` 標籤之
 ## 注意事項
 
 1. **SEO 資訊缺漏提醒** - 如果缺少必要資訊（1-6 項），主動詢問：「請提供以下 SEO 資訊：頁籤標題、分享預覽標題、搜尋關鍵字、網址、預覽圖網址、分享描述文」
-2. **進階資訊詢問** - 如果未提供進階資訊（7-11 項），詢問：「是否需要加入作者與版權資訊？預覽圖尺寸為何？（預設 300x300）」
+2. **進階資訊詢問** - 如果未提供進階資訊（7-11 項），詢問：「是否需要加入作者與版權資訊？預覽圖尺寸為何？（建議 1200x630）」
 3. **GA 資訊處理** - GA 為可選項；提供 GA ID 時自動產生標準 gtag.js 格式；提供完整 script 時先檢查格式正確性
 4. **圖片格式自動判斷** - 根據副檔名設定 `og:image:type`：`.png` → `image/png`、`.jpg`/`.jpeg` → `image/jpeg`、`.webp` → `image/webp`、`.gif` → `image/gif`
 5. **關鍵字格式化** - 接受逗號、頓號或中文頓號分隔，自動轉換為英文逗號分隔格式
