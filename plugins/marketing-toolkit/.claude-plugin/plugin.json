@@ -1,7 +1,7 @@
 {
   "name": "marketing-toolkit",
-  "version": "1.1.0",
-  "description": "行銷工具集：site-seo（把靜態站備妥到可交付、可被搜尋——head/canonical/JSON-LD/robots.txt/sitemap.xml/多頁站，內建預覽站 vs 交付站分流與交付前紅線稽核）＋ add-seo-ga（單一 HTML 檔快速插入 SEO meta 與 Google Analytics 追蹤碼）",
+  "version": "1.2.0",
+  "description": "行銷工具集：site-seo（把靜態站備妥到可交付、可被搜尋——每頁 head／canonical／JSON-LD 結構化資料／robots.txt／sitemap.xml／多頁站，內建預覽站 vs 交付站分流與交付前紅線稽核）",
   "author": {
     "name": "Timothy Liao",
     "email": "tim80411@gmail.com"
@@ -19,8 +19,6 @@
     "robots-txt",
     "json-ld",
     "structured-data",
-    "google-analytics",
-    "gtag",
     "html"
   ]
 }

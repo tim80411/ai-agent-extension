@@ -1,6 +1,6 @@
 ---
 name: site-seo
-description: 把一個靜態網站備妥到「可交付、可被搜尋」的完整 SEO 狀態：每頁 head（title／description／canonical／Open Graph／Twitter Card／lang）、JSON-LD 結構化資料、站台級的 robots.txt 與 sitemap.xml、多頁站的 canonical 與 breadcrumb，以及交付前的逐項稽核。內建「預覽站 vs 正式站」分流——預覽站一律 noindex，交付前必須把 noindex 的 robots.txt 換掉，否則客戶的站會被整站擋出搜尋結果。當要「幫這個站加 SEO」「做 SEO 優化」「加 sitemap／robots／canonical／結構化資料」「交付前檢查 SEO」「網站搜尋不到」時使用。單一 HTML 檔、已知全部資訊、只想快速塞 meta 與 GA 追蹤碼，用 add-seo-ga 就好，不必開這支。
+description: 把一個靜態網站備妥到「可交付、可被搜尋」的完整 SEO 狀態：每頁 head（title／description／canonical／Open Graph／Twitter Card／lang）、JSON-LD 結構化資料、站台級的 robots.txt 與 sitemap.xml、多頁站的 canonical 與 breadcrumb，以及交付前的逐項稽核。內建「預覽站 vs 正式站」分流——預覽站一律 noindex，交付前必須把 noindex 的 robots.txt 換掉，否則客戶的站會被整站擋出搜尋結果。當要「幫這個站加 SEO」「做 SEO 優化」「加 sitemap／robots／canonical／結構化資料」「交付前檢查 SEO」「網站搜尋不到」時使用。
 version: 1.0.0
 ---
 
@@ -256,7 +256,7 @@ Disallow: /
 
 ## 邊界
 
-**這支不管 GA／GTM 追蹤碼。** 加追蹤碼用 `add-seo-ga`。追蹤 ID 一律跟客戶要，
+**這支不管 GA／GTM 追蹤碼。** 那是分析工具的植入，與收錄無關。追蹤 ID 一律跟客戶要，
 不可以用自己的——那會把客戶的流量灌進你的帳號，是嚴重問題。
 
 **這支不管 canvas 內文字的可搜尋性。** Animate→Canvas 的站，畫布內的文字對搜尋引擎
