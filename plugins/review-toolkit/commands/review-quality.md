@@ -4,7 +4,7 @@ description: 啟動六維度程式碼品質審查
 user_invocable: true
 arguments:
   - name: target
-    description: 審查目標（模組名稱、檔案路徑、或 "all"）
+    description: 審查目標（模組名稱、檔案路徑、或 "all"）；可附 `--full` 強制六個 agent 全跑
     required: false
 ---
 
@@ -12,3 +12,4 @@ arguments:
 
 若使用者提供了 `$ARGUMENTS`，將其作為審查目標傳入 Phase 0。
 若未提供，進入 Phase 0 的互動式確認流程。
+若 `$ARGUMENTS` 含 `--full`，傳入 Phase 0 時標記為 full 級。
