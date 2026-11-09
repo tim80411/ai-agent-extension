@@ -8,6 +8,7 @@ description: >-
   "review my user stories", "break down a feature into stories",
   "story mapping", "需求拆解", "user story mapping",
   "拆解大功能", "建立 story map",
+  "agent-ready 工單", "給 agent 的工單", "SPEC.md",
   or needs guidance on spec writing methodology, story types,
   scoping, acceptance criteria, prioritization, or INVEST quality checks.
 ---
@@ -62,10 +63,12 @@ description: >-
      - 現有 Story 編號水位（若有）
      - 文件資料夾結構
 
-5. 彙整所有 agent 回傳的資訊，建立 **Context Summary**，供後續階段引用。
+5. **輸入檢查**：輸入不能只有一句 story，要有需求描述或脈絡。只給 story 時產出的 AC 品質明顯較差（依據：`docs/analyses/2026-11-09-agent-ticket-conformance.md` 第二節）；若只有一句話，在 Phase 1 追問需求描述與脈絡。
+
+6. 彙整所有 agent 回傳的資訊，建立 **Context Summary**，供後續階段引用。
    若使用者無文件且無 codebase，直接建立空白 Context Summary 並進入 Phase 1。
 
-6. 更新 todo，標記 Phase 0 完成。
+7. 更新 todo，標記 Phase 0 完成。
 
 ---
 
@@ -144,10 +147,12 @@ description: >-
 
 6. 若使用者說「你覺得怎樣就怎樣」，提供你的建議並取得明確確認。
 
+7. **分開記錄「已決定」與「未決」**：把釐清過程中使用者決定了什麼，與仍未決的歧義分開記錄。未決項寫進每個 Story 的「歧義清單」段（格式：`Q1: ＿＿ → 決定：＿＿`），並在 Phase 2 呈現草稿時明確要求 PM 決定，不可留給 coding agent 猜。
+
 **DO NOT PROCEED TO PHASE 2 UNTIL ALL THREE CORE ITEMS ARE CONFIRMED：**
 受益者、期望成果、No-gos（或使用者明確說明「無 No-gos」）。
 
-7. 更新 todo，標記 Phase 1 完成。
+8. 更新 todo，標記 Phase 1 完成。
 
 ---
 
@@ -181,9 +186,16 @@ description: >-
       - Enabler Story → `assets/enabler-story.md`
       - Spike → `assets/spike.md`
 
-   c. **填寫模板**，替換所有佔位符；不適用的段落整段移除。
+   c. **填寫模板**，替換所有佔位符；不適用的段落整段移除，但五段不可移除：範圍與限制、相關檔案與上下文、驗收標準、Done when、歧義清單；無內容時分別寫 `* （無）`（範圍外、歧義清單）或 `* 待 agent 探索`（相關檔案）。新段落填法：
+      - **範圍與限制**：「涵蓋」列本 Story 做什麼；「範圍外（No-gos）」列明確不做的事，來自 Phase 1 確認的 No-gos。
+      - **相關檔案與上下文**：已知會碰到的模組／檔案路徑、相關既有行為、相關 Story（可取自 `codebase-explorer` 的結果）；不確定就寫「待 agent 探索」，不要編造路徑。
+      - **Done when**：「全部為真才算完成」的清單，至少含「每條 AC 都有對應且通過的測試」「既有測試、typecheck、lint 全綠」「未改動 No-gos 涉及的範圍；「相關檔案」以外新碰到的檔案要在 PR 說明列出」，可再加 Story 專屬項目。「範圍外」指 No-gos，不是「相關檔案」以外的所有檔案，否則與「待 agent 探索」衝突。
+      - **歧義清單**：填入 Phase 1 仍未決的問題；呈現草稿時請 PM 逐題決定，決定後改寫為 `Q1: ＿＿ → 決定：＿＿`。
 
    d. **撰寫驗收標準**（參照 `references/03-acceptance-criteria.md`），以 Given-When-Then 情境格式撰寫：
+      - 標題用「驗收標準（Acceptance Criteria）」，括號內英文供 Rovo、Copilot 等工具辨識，不可省略
+      - 每條情境編號 `AC-1`、`AC-2`…，供測試追溯
+      - 套用 `03-acceptance-criteria.md` 的三條 agent 檢查：Then 可觀察可失敗、Given 的前置狀態可建立、一條 AC 一條規則
       - 每個 Story 至少包含一個 Happy Path 情境
       - 評估是否需要 Error Path 和 Edge Case 情境
       - Given 可包含多個前提條件（用 AND 串接），When 只有一個觸發動作
@@ -202,13 +214,15 @@ description: >-
       - Frontmatter 中 `story_id`、`title`、`type`、`priority` 必須填入
       - Frontmatter 中 `tracker_type`、`tracker_id`、`synced_at` 留空（Phase 2.5 填入）
 
-3. 完成所有 Stories 草稿後，以清晰格式呈現給使用者確認。
+3. 完成所有 Stories 草稿後，以清晰格式呈現給使用者確認，並把「歧義清單」的未決項明確列出請 PM 決定。
 
 4. 若使用者要求修改，根據反饋調整並再次確認。
 
-5. **DO NOT PROCEED TO PHASE 2.5 UNTIL THE USER EXPLICITLY APPROVES THE DRAFT.**
+5. **DO NOT PROCEED TO PHASE 2.5 UNTIL THE USER EXPLICITLY APPROVES THE DRAFT，且歧義清單無未決項（除非使用者明確說保留）。** 若使用者明確說保留，在 Story 的歧義清單段首行加 `（含未決項，使用者保留）`，可進 Phase 2.5，但不產 SPEC.md。
 
-6. 更新 todo，標記 Phase 2 完成。
+6. **（可選，使用者說要派給 coding agent 時才做）輸出精簡 `SPEC.md`**（或依使用者指定的檔名）。在歧義全部決定後才產出；若使用者選擇保留未決項，不產 SPEC.md。內容只含：目標一句、範圍與限制、相關檔案、已決定的歧義（只列 `Qn → 決定`，不列未決）、AC 全文、Done when。一張 Story 一份；檔名 `spec-{N}.md`，放在該 Story 檔同目錄（使用者另有指定則依指定）；80 行上限是每份；不取代 Story 檔。要短的原因：spec 太長反而沒人讀（依據：`docs/analyses/2026-11-09-agent-ticket-conformance.md` 第六節）。
+
+7. 更新 todo，標記 Phase 2 完成。
 
 ---
 
@@ -268,29 +282,32 @@ description: >-
 
 **Required References**:
 - `references/05-invest-checklist.md` — INVEST 六項標準
-- `references/06-anti-patterns.md` — 七大反模式清單
+- `references/06-anti-patterns.md` — 八大反模式清單
+- `references/03-acceptance-criteria.md` — 三條 agent 檢查
 
 **Actions**:
 
-1. 啟動 `spec-reviewer` agent（via Task 工具）。
-2. Agent 任務：「請對以下 Stories 進行 INVEST 逐條檢查與反模式掃描：[Phase 2 完成的 Stories 全文]。請讀取 references/05-invest-checklist.md 與 references/06-anti-patterns.md 作為評判依據。」
-3. Agent 須回傳：
+1. 讀取上述三份 reference，把內容內嵌進 agent prompt（spec-reviewer 在使用者專案目錄執行，plugin 的 references 路徑可能讀不到）。
+2. 啟動 `spec-reviewer` agent（via Task 工具）。
+3. Agent 任務：「請對以下 Stories 進行 INVEST 逐條檢查與反模式掃描：[Phase 2 完成的 Stories 全文]。評判依據如下：[內嵌 05-invest-checklist、06-anti-patterns、03-acceptance-criteria 的內容]。同時依 03-acceptance-criteria.md 的三條 agent 檢查與 06 的反模式 8 判定每個 Story 是否 agent-ready，缺什麼逐條列出。歧義清單標示『使用者保留』時判『否（保留）』，品質等級最高為『良』。」
+4. Agent 須回傳：
    - 每個 Story 的 INVEST 結果（pass/fail 逐項）
    - 命中的反模式及修正建議
    - 驗收標準是否 Outcome-Focused
+   - agent-ready 判定（是／否／否（保留）＋缺項）
    - 整體品質等級（優 / 良 / 需修正）
 
-4. 向使用者呈現審查結果。
+5. 向使用者呈現審查結果。
 
-5. 若有需修正的 Story：
+6. 若有需修正的 Story：
    - 使用 `AskUserQuestion` 詢問使用者：「立即修正 / 稍後修正 / 維持現狀」
    - **等待使用者回答後再繼續。**
    - 若有多個 Story 需修正，將所有問題合併在同一個 `AskUserQuestion` 呼叫中。
    - 若選擇立即修正，回到 Phase 2 針對特定 Story 調整，完成後重新觸發 Phase 3
 
-6. 所有 Stories 達到「良」或「優」後，輸出最終版本。
+7. 所有 Stories 達到「良」或「優」後，輸出最終版本。
 
-7. 更新 todo，標記 Phase 3 完成。
+8. 更新 todo，標記 Phase 3 完成。
 
 ---
 
@@ -311,13 +328,15 @@ Phase 0.5: Story Decomposition（可選）
 Phase 1: Requirement Clarification
   ↓ AskUserQuestion (beneficiary, outcome, no-gos)
   ↓ Story type pre-classification → user confirm
+  ↓ 記錄已決定 vs 未決 → 歧義清單
   ↓ GATE: user confirms understanding
 
 Phase 2: Story Writing
   ↓ Per requirement: classify → read template → fill → assign ID → label
   ↓ Write each Story to individual .md file with frontmatter
-  ↓ Present draft to user
-  ↓ GATE: user satisfied with draft
+  ↓ Present draft to user（歧義清單請 PM 決定）
+  ↓ GATE: user satisfied with draft，歧義清單無未決項（或使用者保留）
+  ↓ 可選：精簡 spec-{N}.md（派給 coding agent 且歧義已全決定時）
 
 Phase 2.5: Tracker Sync
   ↓ AskUserQuestion (sync to tracker? which one? which project?)
@@ -325,8 +344,8 @@ Phase 2.5: Tracker Sync
   └── 否 → skip
 
 Phase 3: Quality Review
-  ↓ [spec-reviewer agent]
-  ↓ Present INVEST + anti-pattern results
+  ↓ [spec-reviewer agent]（references 內嵌進 prompt）
+  ↓ Present INVEST + anti-pattern + agent-ready 判定
   ↓ If issues → back to Phase 2 (targeted fix)
   ↓ Final output when all stories pass
 ```
@@ -335,10 +354,10 @@ Phase 3: Quality Review
 
 - **`references/01-story-types.md`** — User Story vs. Enabler Story 的定義、格式、範例
 - **`references/02-scoping.md`** — 範圍界定方法（Shape Up pitch、No-gos、Appetite）
-- **`references/03-acceptance-criteria.md`** — 驗收標準撰寫原則與好壞對比範例
+- **`references/03-acceptance-criteria.md`** — 驗收標準撰寫原則與好壞對比範例；含給 coding agent 的三條檢查與 AC-n 編號追溯
 - **`references/04-prioritization.md`** — 優先序排定方法
-- **`references/05-invest-checklist.md`** — INVEST 六項檢查標準與實際操作方式
-- **`references/06-anti-patterns.md`** — 常見反模式清單與修正方式
+- **`references/05-invest-checklist.md`** — INVEST 六項檢查標準與實際操作方式（S、T 含 agent 專用通過條件）
+- **`references/06-anti-patterns.md`** — 常見反模式清單與修正方式（含反模式 8：工單對 agent 不友善）
 - **`references/07-frameworks-comparison.md`** — 各方法論比較（JTBD、Shape Up、Working Backwards）
 - **`references/08-workflow-conventions.md`** — 標題命名、Label 規則、Story ID 編號規則、模板對應
 - **`references/09-story-mapping.md`** — Story Mapping 方法論（Activity → Task → Story 拆解、Release Slicing）
