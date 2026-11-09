@@ -44,7 +44,7 @@
       "name": "review-toolkit",
       "source": "./plugins/review-toolkit",
       "description": "驗證／審查工具集：code-quality-review（六維度平行程式碼品質審查）＋ copy-verify（使用者文案對術語 SSOT 的驗證與對齊，含禁用詞守衛）",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "author": {
         "name": "Timothy Liao",
         "email": "tim80411@gmail.com"
