@@ -143,7 +143,7 @@ grep -q 'git_branch' "$(sed -n 2p <<<"$OUT")" && bad "無 git 不該有 git_bran
 head_ "provider 閘門"
 mkdir -p "$WORK/jirathing"
 OUT=$(cd "$WORK/jirathing" && $NEW "應該被擋" 2>&1); RC=$?
-[[ $RC -eq 2 ]] && grep -q 'jira-cli' <<<"$OUT" && ok "jira profile 拒絕並指向正確工具（exit 2）" || bad "provider 閘門" "rc=$RC $OUT"
+[[ $RC -eq 2 ]] && grep -q 'jira-cli' <<<"$OUT" && grep -q 'jira-ticket-authoring' <<<"$OUT" && ok "jira profile 拒絕並指向正確工具（exit 2）" || bad "provider 閘門" "rc=$RC $OUT"
 
 head_ "專案自帶工具時讓位"
 mkdir -p "$WORK/hastool"

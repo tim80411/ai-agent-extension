@@ -75,6 +75,7 @@ synced_at: 2026-03-21T07:06:51Z # 最後同步時間 ISO-8601（選填，sync �
 - **N** 為專案流水號（全域唯一）
 - 新增時取當前所有 Stories 中最大的 N 值 +1
 - Spike 不佔用 Story 流水號
+- 這是本地 Story 檔的標題；同步到 Jira 時，Jira 工單標題照 `jira-ticket-authoring` 的規則（沿用專案既有寫法）
 
 ### 範例
 
@@ -89,7 +90,7 @@ synced_at: 2026-03-21T07:06:51Z # 最後同步時間 ISO-8601（選填，sync �
 
 ## Labels 規則
 
-每個 Story 應標記兩類 Label：
+每個 Story 應標記兩類 Label（本地 Story 檔與 Linear 用；同步到 Jira 時，標籤與優先度照 `jira-ticket-authoring` 的規則，不帶這兩類）：
 
 ### 優先序
 

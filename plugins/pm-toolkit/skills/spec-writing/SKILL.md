@@ -11,11 +11,14 @@ description: >-
   "agent-ready 工單", "給 agent 的工單", "SPEC.md",
   or needs guidance on spec writing methodology, story types,
   scoping, acceptance criteria, prioritization, or INVEST quality checks.
+  要在 Jira 開規劃型工單（故事、任務）時改用 jira-ticket-authoring。
 ---
 
 # Spec 撰寫方法論
 
 引導撰寫高品質的 User Story、Enabler Story 與 Spike，並以 INVEST 標準確保品質。
+
+本 skill 產出的是給 coding agent 照著做的檔案式 Story；要在 Jira 開規劃型工單（故事、任務）時，改用 `jira-ticket-authoring` skill。
 
 全程使用中文與使用者互動。
 
@@ -245,7 +248,13 @@ description: >-
 
 2. **等待使用者回答後再繼續。**
 
-3. 若使用者選擇同步：
+3. 若使用者選擇同步到 **Jira**：不走下面 a～c 的對應規則，改交給 `jira-ticket-authoring` skill，從它的第四段「列待裁示」開始走：
+   - 確認過的 Story 檔全文當輸入；已有 `tracker_id` 的，在待裁示列為「修正既有工單」。
+   - 類型、標題、優先度、標籤、指派、Epic 都照那支 skill 的規則，不用本段的 P0→Urgent 對應、type／priority 標籤與 `[Story N]` 標題。
+   - 使用者在待裁示同意後才建單或改單。
+   - 建完把工單號寫回 frontmatter：`tracker_type: jira`、`tracker_id: {工單號}`、`synced_at: {ISO-8601 時間}`。
+
+4. 若使用者選擇同步到 **Linear**：
 
    a. **檢查既有映射**：讀取每個 Story 檔案的 frontmatter：
       - 若已有 `tracker_id` → 比對 `synced_at` 與 Tracker 的 `updatedAt`
@@ -268,9 +277,9 @@ description: >-
       synced_at: 2026-03-21T07:06:51Z
       ```
 
-4. 向使用者呈現同步結果（建立了哪些 issues、更新了哪些）。
+5. 向使用者呈現同步結果（建立了哪些 issues、更新了哪些）。
 
-5. 更新 todo，標記 Phase 2.5 完成。
+6. 更新 todo，標記 Phase 2.5 完成。
 
 ---
 
@@ -340,7 +349,8 @@ Phase 2: Story Writing
 
 Phase 2.5: Tracker Sync
   ↓ AskUserQuestion (sync to tracker? which one? which project?)
-  ├── 是 → Create/update issues via MCP → write back tracker_id to frontmatter
+  ├── Linear → Create/update issues via MCP → write back tracker_id to frontmatter
+  ├── Jira → jira-ticket-authoring 第四段（列待裁示）起 → user approves → create/update → write back tracker_id
   └── 否 → skip
 
 Phase 3: Quality Review

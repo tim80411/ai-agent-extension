@@ -14,7 +14,7 @@ export class ConfigError extends Error {}
 // file-based 是本 plugin 唯一「會動手」的 provider；其餘只做辨識與轉介。
 export const PROVIDERS = {
   'file-based': { handled: true },
-  jira: { handled: false, hint: '改用 jira-cli skill（或 Atlassian MCP）操作' },
+  jira: { handled: false, hint: '改用 jira-cli skill（或 Atlassian MCP）操作；規劃型工單的撰寫與開單用 jira-ticket-authoring skill' },
   github: { handled: false, hint: '改用 `gh issue` / GitHub MCP 操作' },
   linear: { handled: false, hint: 'Linear 專案請走 Linear 自己的工具' },
 };

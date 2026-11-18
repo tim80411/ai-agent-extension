@@ -28,7 +28,7 @@
 > 身為開發者，我需要設定 wildcard DNS，以便所有 subdomain 都能解析。
 
 **好：**
-> 身為老師，我需要透過好記的專屬網址（如 LessonHelp.nani.com.tw）存取工具，以便不需要記住複雜的 URL。
+> 身為老師，我需要透過好記的專屬網址（如 LessonHelp.example.com）存取工具，以便不需要記住複雜的 URL。
 
 DNS 設定是支持這個 Story 的技術任務，不是 Story 本身。
 

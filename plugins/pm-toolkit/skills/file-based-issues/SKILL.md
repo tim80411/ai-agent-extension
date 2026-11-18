@@ -22,8 +22,10 @@ description: >-
   issue / 開子單 / 加 subtask / 改 issue 狀態 / 標 Done / issue 歸 milestone /
   狀態漂移 / 對帳 issue / issue 格式 / 本地 issue / 檔案式 issue / local issue
   tracker / issue:new-style script, even if they don't say the word "skill".
-  NOT for Jira/Linear (use `jira-create-ticket` for Jira) and NOT for GitHub
-  Issues driven through the API.
+  NOT for Jira/Linear (for Jira planning tickets — stories / tasks — use
+  `jira-ticket-authoring`; for bugs, complaints and other ticket types use the
+  matching Jira ticket skill in your environment) and NOT for GitHub Issues
+  driven through the API.
 ---
 
 # 操作檔案式 / 本地化 Issue Tracker（file-based-issues）
@@ -45,7 +47,7 @@ description: >-
 | 情境 | 用這個 skill？ | 改用 |
 |---|---|---|
 | repo 內 `issues/`（或類似）目錄，issue = markdown+frontmatter 資料夾、受 git 追蹤 | ✅ 是 | — |
-| Jira 工單 | ❌ 否 | `jira-create-ticket` skill |
+| Jira 工單 | ❌ 否 | 規劃型工單（故事、任務）用 `jira-ticket-authoring`；Bug、客訴等其他類型，用環境裡對應的 Jira 開單 skill |
 | Linear（已退役的專案） | ❌ 否 | 唯讀歷史，不要開/改 |
 | GitHub Issues（透過 API/gh 操作） | ❌ 否 | `gh issue` / 對應工具 |
 | 撰寫 user story / AC / story mapping 的方法論 | ❌ 否 | `spec-writing` skill（本 skill 只管 tracker 操作，不管內容品質） |
@@ -97,7 +99,7 @@ node ${CLAUDE_PLUGIN_ROOT}/scripts/pm-config.mjs show --json
 | `provider` | 本 skill | 該用什麼 |
 |---|---|---|
 | `file-based` | ✅ 全程處理 | 就是這份文件 |
-| `jira` | ❌ 轉介 | `jira-cli` skill（或 Atlassian MCP） |
+| `jira` | ❌ 轉介 | `jira-cli` skill（或 Atlassian MCP）；要寫規劃型工單時用 `jira-ticket-authoring` |
 | `github` | ❌ 轉介 | `gh issue` / GitHub MCP |
 | `linear` | ❌ 轉介 | Linear 自己的工具 |
 
